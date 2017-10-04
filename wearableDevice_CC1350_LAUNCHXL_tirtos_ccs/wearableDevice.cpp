@@ -87,7 +87,6 @@ volatile UInt32 timestamp = 0;
 volatile uint16_t heartRateNumber = 0;
 bool taskExitIsSet = false, enableSleep = false, stateDisplay = Display_ON ;
 
-pedometer Pedometer;
 I2C_Handle i2c;
 I2C_Params i2cParams;
 I2C_Transaction i2cTransaction;
@@ -149,13 +148,13 @@ void gpioButtonFxn1(uint_least8_t index){
 }
 
 void display_head(void){
-    displayOLED.Clear_head();
-    displayOLED.setTextSize(1);
-    displayOLED.setTextColor(WHITE);
-    displayOLED.setCursor(40, 8);
-    displayOLED.print((uint8_t*)elementHead.text);
-    displayOLED.Bluetooth_icon(elementHead.bleIcon);
-    displayOLED.Battery_set(elementHead.batteryLevel);
+    WDsDisplay__Clear_head();
+    WDsDisplay__setTextSize(1);
+    WDsDisplay__setTextColor(WHITE);
+    WDsDisplay__setCursor(40, 8);
+    WDsDisplay__print((uint8_t*)elementHead.text);
+    WDsDisplay__Bluetooth_icon(elementHead.bleIcon);
+    WDsDisplay__Battery_set(elementHead.batteryLevel);
     eventChange.head = true;
 }
 
@@ -167,9 +166,9 @@ void clock_main(uint32_t secs){
         clk.setSecond();
         uint8_t hour = clk.getHour();
         uint8_t min = clk.getMinute();
-        displayOLED.Clear_body();
-        displayOLED.Clock_set(hour, min);
-        displayOLED.Colon_toogle();
+        WDsDisplay__Clear_body();
+        WDsDisplay__Clock_set(hour, min);
+        WDsDisplay__Colon_toogle();
         eventChange.body = true;
 
         if(!enableSleep){
@@ -183,12 +182,12 @@ void clock_main(uint32_t secs){
 
 void heart_show(uint8_t rate){
     static uint8_t _rate;
-    displayOLED.Clear_body();
-    displayOLED.Heartrate_status();
+    WDsDisplay__Clear_body();
+    WDsDisplay__Heartrate_status();
     if(_rate != rate){
         _rate = rate;
     }
-    displayOLED.Heartrate_number(_rate);
+    WDsDisplay__Heartrate_number(_rate);
     eventChange.body = true;
 }
 
@@ -209,12 +208,12 @@ void heart_main(){
 
 void pedometer_show(int16_t stepCount) {
     static uint8_t _stepCount;
-    displayOLED.Clear_body();
-    displayOLED.Footsteps_status();
+    WDsDisplay__Clear_body();
+    WDsDisplay__Footsteps_status();
     if(_stepCount != stepCount){
         _stepCount = stepCount;
     }
-    displayOLED.Footsteps_number(_stepCount);
+    WDsDisplay__Footsteps_number(_stepCount);
     eventChange.body = true;
 }
 
@@ -222,11 +221,11 @@ void pedometer_show(int16_t stepCount) {
 int16_t pedometer_measurement(){
     uint8_t Buf[20];
     static int16_t StepCount;
-    Pedometer.cmd_readstatus();
-    Pedometer.Read(Buf, 2);
+    Pedometer_cmd_readstatus();
+    Pedometer_Read(Buf, 2);
     if (Buf[1] == 0x80)
     {
-        Pedometer.Read(Buf, 16);
+        Pedometer_Read(Buf, 16);
         StepCount = (Buf[6] <<8) | Buf[7];
     }
     return StepCount;
@@ -247,46 +246,43 @@ void checkDimOLED(uint8_t time){
 }
 
 
-class hienthi{
-public:
-    hienthi(){
-        displayOLED.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-        displayOLED.clearDisplay();
-        displayOLED.display();
-    }
+void HienThi_init(){
+    WDsDisplay__begin(SSD1306_SWITCHCAPVCC, 0x3C);
+    WDsDisplay__clearDisplay();
+    WDsDisplay__display();
+}
 
-    void showHead(void){
-        display_head();
-        if(eventChange.head){
-            displayOLED.Display_head();
-            eventChange.head = false;
-        }
+void HienThi_showHead(void){
+    display_head();
+    if(eventChange.head){
+        WDsDisplay__Display_head();
+        eventChange.head = false;
     }
+}
 
-    /*
-     * Mode 0: Clock
-     * Mode 1: StepCount
-     *
-     * */
-    void showBody(uint8_t mode){
-        switch(mode){
-            case 0:  clock_main(timestamp); break;
-            case 1:  heart_main(); break;
-            case 2:  pedometer_main(); break;
-            case 3:  break;
-            default: break;
-        }
-        if(eventChange.body){
-            displayOLED.Display_body();
-            eventChange.body = false;
-        }
+/*
+ * Mode 0: Clock
+ * Mode 1: StepCount
+ *
+ * */
+void HienThi_showBody(uint8_t mode){
+    switch(mode){
+        case 0:  clock_main(timestamp); break;
+        case 1:  heart_main(); break;
+        case 2:  pedometer_main(); break;
+        case 3:  break;
+        default: break;
     }
+    if(eventChange.body){
+        WDsDisplay__Display_body();
+        eventChange.body = false;
+    }
+}
 
-    void TurnONOFFDisplay(bool turn){
-        displayOLED.onoff(turn);
-        onoff = turn;
-    }
-};
+void HienThi_TurnONOFFDisplay(bool turn){
+    WDsDisplay__onoff(turn);
+    onoff = turn;
+}
 
 
 
@@ -322,8 +318,9 @@ static void mainTaskStructFunction(UArg arg0, UArg arg1){
     }else
         Display_printf(display, 0, 0, "I2C Initialized!\n");
 
-    Pedometer.init();
-    hienthi HienThi;
+    WDsDisplay__init(OLED_RESET);
+    HienThi_init();
+    Pedometer_init();
     elementHead.bleIcon = true;
     std::strcpy( elementHead.text, "MEMSITECH");
     elementHead.batteryLevel = 50;
@@ -335,7 +332,7 @@ static void mainTaskStructFunction(UArg arg0, UArg arg1){
        uint32_t events = Event_pend(operationEventHandle, 0, EVENT_ALL, BIOS_WAIT_FOREVER);
 
       if(events & EVENT_SLEEPMODE_COMPLETE){
-           HienThi.TurnONOFFDisplay(false);
+           HienThi_TurnONOFFDisplay(false);
            stateDisplay = Display_OFF;
            Clock_stop(mainClockHandle);
 //           Semaphore_reset(sem0Handle,0);
@@ -343,14 +340,14 @@ static void mainTaskStructFunction(UArg arg0, UArg arg1){
        }
 
       if(events & EVENT_TURNON_DISPLAY){
-          HienThi.TurnONOFFDisplay(true);
+          HienThi_TurnONOFFDisplay(true);
           stateDisplay = Display_ON;
           Clock_start(mainClockHandle);
       }
 
          if(events & EVENT_UPDATE_OLED && stateDisplay == Display_ON){
-            HienThi.showHead();
-            HienThi.showBody(modeMain);
+            HienThi_showHead();
+            HienThi_showBody(modeMain);
            // Event_post(operationEventHandle1, EVENT_SLEEPMODE_START);
         }
     }

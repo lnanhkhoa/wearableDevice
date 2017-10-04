@@ -5,8 +5,8 @@
  *      Author: AppsTI
  */
 
-#ifndef OLEDDISPLAY_WDSDISPLAY_H_
-#define OLEDDISPLAY_WDSDISPLAY_H_
+#ifndef OLEDDISPLAY_WDsDisplay__H_
+#define OLEDDISPLAY_WDsDisplay__H_
 
 #include <stdint.h>
 #include <OledDisplay/Adafruit_SSD1306.h>
@@ -45,32 +45,31 @@ const uint8_t sizeSmallHeart[2] = {32, 32};
 #define footsteps_y 16
 const uint8_t sizeFootsteps[2] = {48, 48};
 
-class WDsDisplay : public Adafruit_SSD1306
-{
-public:
-    WDsDisplay(int8_t rst);
-    virtual ~WDsDisplay();
-    void Bluetooth_icon(bool enable);
-    void Battery_charging(void);
-    void Battery_set(uint8_t percent, bool charge = false);
-    void Clock_set(uint8_t hh, uint8_t mm);
-    void Colon_toogle(void);
-    void Heartrate_status(void);
-    void Heartrate_number(int8_t number); // -1 is wait
-    void Footsteps_status(void);
-    void Footsteps_number(uint32_t number);
 
-    void Display_head(void);
-    void Display_body(void);
-    void Clear_head(void);
-    void Clear_body(void);
-private:
-    bool colon_status, footsteps_status;
-    uint8_t heart_status;
+bool colon_status, footsteps_status;
+uint8_t heart_status;
+
+    void WDsDisplay__init(int8_t rst);
+    void WDsDisplay__begin();
+    void WDsDisplay__Bluetooth_icon(bool enable);
+    void WDsDisplay__Battery_charging(void);
+    void WDsDisplay__Battery_set(uint8_t percent, bool charge = false);
+    void WDsDisplay__Clock_set(uint8_t hh, uint8_t mm);
+    void WDsDisplay__Colon_toogle(void);
+    void WDsDisplay__Heartrate_status(void);
+    void WDsDisplay__Heartrate_number(int8_t number); // -1 is wait
+    void WDsDisplay__Footsteps_status(void);
+    void WDsDisplay__Footsteps_number(uint32_t number);
+
+    void WDsDisplay__Display_head(void);
+    void WDsDisplay__Display_body(void);
+    void WDsDisplay__Clear_head(void);
+    void WDsDisplay__Clear_body(void);
+
     void clear_16x16(int16_t x, int16_t y, uint16_t color);
     void clear_18x24(int16_t x, int16_t y, uint16_t color);
     void clear_heart(int16_t x, int16_t y, uint16_t color);
     void clear_character(int16_t x, int16_t y, uint16_t fontsize, uint16_t length, uint16_t color);
-};
 
-#endif /* OLEDDISPLAY_WDSDISPLAY_H_ */
+
+#endif /* OLEDDISPLAY_WDsDisplay__H_ */

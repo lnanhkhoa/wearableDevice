@@ -15,28 +15,12 @@ Written by Limor Fried/Ladyada  for Adafruit Industries.
 BSD license, check license.txt for more information
 All text above, and the splash screen must be included in any redistribution
 *********************************************************************/
-#ifndef _Adafruit_SSD1306_H_
-#define _Adafruit_SSD1306_H_
+#ifndef _AdafruitSSD1306_H_
+#define _AdafruitSSD1306_H_
 
-
-#if defined(__SAM3X8E__)
- typedef volatile RwReg PortReg;
- typedef uint32_t PortMask;
- #define HAVE_PORTREG
-#elif defined(ARDUINO_ARCH_SAMD)
-// not supported
-#elif defined(ESP8266) || defined(ESP32) || defined(ARDUINO_STM32_FEATHER) || defined(__arc__)
-    typedef volatile uint32_t PortReg;
-    typedef uint32_t PortMask;
-#elif defined(__AVR__)
-    typedef volatile uint8_t PortReg;
-    typedef uint8_t PortMask;
-    #define HAVE_PORTREG
-#else
     // chances are its 32 bit so assume that
     typedef volatile uint32_t PortReg;
     typedef uint32_t PortMask;
-#endif
 
 #include "Adafruit_GFX.h"
 
@@ -134,48 +118,72 @@ All text above, and the splash screen must be included in any redistribution
 #define SSD1306_VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL 0x29
 #define SSD1306_VERTICAL_AND_LEFT_HORIZONTAL_SCROLL 0x2A
 
-class Adafruit_SSD1306 : public Adafruit_GFX {
- public:
-    Adafruit_SSD1306(int8_t SID, int8_t SCLK, int8_t DC, int8_t RST, int8_t CS);
-    Adafruit_SSD1306(int8_t DC, int8_t RST, int8_t CS);
-    Adafruit_SSD1306(int8_t RST = -1);
 
-    void begin(uint8_t switchvcc = SSD1306_SWITCHCAPVCC, uint8_t i2caddr = SSD1306_I2C_ADDRESS, bool reset=true);
+extern void (*P_drawPixel)(int16_t , int16_t , uint16_t );
+
+extern void 
+    (*P_startWrite)(void),
+    (*P_writePixel)(int16_t, int16_t , uint16_t ),
+    (*P_writeFillRect)(int16_t , int16_t , int16_t , int16_t , uint16_t ),
+    (*P_writeFastVLine)(int16_t , int16_t , int16_t , uint16_t ),
+    (*P_writeFastHLine)(int16_t , int16_t , int16_t , uint16_t ),
+    (*P_writeLine)(int16_t , int16_t , int16_t , int16_t , uint16_t ),
+    (*P_endWrite)(void);
+
+extern void (*PsetRotation)(uint8_t);
+
+extern void
+    (*P_drawFastVLine)(int16_t , int16_t , int16_t , uint16_t ),
+    (*P_drawFastHLine)(int16_t , int16_t , int16_t , uint16_t ),
+    (*P_fillRect)(int16_t , int16_t , int16_t , int16_t , uint16_t ),
+    (*P_fillScreen)(uint16_t ),
+    (*P_drawLine)(int16_t , int16_t , int16_t , int16_t , uint16_t ),
+    (*P_drawRect)(int16_t , int16_t , int16_t , int16_t , uint16_t );
+
+extern void (*P_write)(uint8_t);
+
+    // void AdafruitSSD1306_init(int8_t SID, int8_t SCLK, int8_t DC, int8_t RST, int8_t CS);
+    // void AdafruitSSD1306_init(int8_t DC, int8_t RST, int8_t CS);
+    void AdafruitSSD1306_init(int8_t RST = -1);
+
+    void AdafruitSSD1306_begin(uint8_t switchvcc = SSD1306_SWITCHCAPVCC, uint8_t i2caddr = SSD1306_I2C_ADDRESS, bool reset=true);
     void ssd1306_command(uint8_t c);
 
-    void clearDisplay(void);
-    void invertDisplay(uint8_t i);
-    void display(void);
-    void display(uint8_t startPage, uint8_t endPage);
+    void AdafruitSSD1306_clearDisplay(void);
+    void AdafruitSSD1306_invertDisplay(uint8_t i);
+    void AdafruitSSD1306_display(void);
+    void AdafruitSSD1306_display(uint8_t startPage, uint8_t endPage);
 
-    void startscrollright(uint8_t start, uint8_t stop);
-    void startscrollleft(uint8_t start, uint8_t stop);
+    void AdafruitSSD1306_startscrollright(uint8_t start, uint8_t stop);
+    void AdafruitSSD1306_startscrollleft(uint8_t start, uint8_t stop);
 
-    void startscrolldiagright(uint8_t start, uint8_t stop);
-    void startscrolldiagleft(uint8_t start, uint8_t stop);
-    void stopscroll(void);
+    void AdafruitSSD1306_startscrolldiagright(uint8_t start, uint8_t stop);
+    void AdafruitSSD1306_startscrolldiagleft(uint8_t start, uint8_t stop);
+    void AdafruitSSD1306_stopscroll(void);
 
-    void dim(boolean dim);
-    void onoff(bool mode);
-    uint8_t* getbuffer(void);
-    void drawPixel(int16_t x, int16_t y, uint16_t color);
+    void AdafruitSSD1306_dim(boolean dim);
+    void AdafruitSSD1306_onoff(bool mode);
+    uint8_t *AdafruitSSD1306_getbuffer(void);
 
-    virtual void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
-    virtual void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
+    void AdafruitSSD1306_drawPixel(int16_t x, int16_t y, uint16_t color);
 
- private:
-    int8_t _i2caddr, _vccstate, sid, sclk, dc, rst, cs;
-    void fastSPIwrite(uint8_t c);
+    void AdafruitSSD1306_drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
+    void AdafruitSSD1306_drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
+    void AdafruitSSD1306_fastSPIwrite(uint8_t c);
 
-    boolean hwSPI;
-#ifdef HAVE_PORTREG
-    PortReg *mosiport, *clkport, *csport, *dcport;
-    PortMask mosipinmask, clkpinmask, cspinmask, dcpinmask;
-#endif
+    void AdafruitSSD1306_drawFastVLineInternal(int16_t x, int16_t y, int16_t h, uint16_t color) __attribute__((always_inline));
+    void AdafruitSSD1306_drawFastHLineInternal(int16_t x, int16_t y, int16_t w, uint16_t color) __attribute__((always_inline));
 
-    inline void drawFastVLineInternal(int16_t x, int16_t y, int16_t h, uint16_t color) __attribute__((always_inline));
-    inline void drawFastHLineInternal(int16_t x, int16_t y, int16_t w, uint16_t color) __attribute__((always_inline));
+/*************************************************************************************************************************************/
+    extern void (*P_drawBitmap)(int16_t , int16_t , const unsigned char *, int16_t , int16_t , uint16_t );
+    void AdafruitSSD1306_drawBitmap(int16_t x, int16_t y, const unsigned char bitmap[], int16_t w, int16_t h, uint16_t color);
 
-};
+    extern void (*P_setCursor)(int16_t , int16_t ),
+                (*P_setTextColor)(uint16_t ),
+                (*P_setTextSize)(uint8_t );
 
-#endif /* _Adafruit_SSD1306_H_ */
+    void AdafruitGFX_setCursor(int16_t x, int16_t y);
+    void AdafruitGFX_setTextColor(uint16_t c);
+    void AdafruitGFX_setTextSize(uint8_t s);
+
+#endif /* _AdafruitSSD1306_H_ */

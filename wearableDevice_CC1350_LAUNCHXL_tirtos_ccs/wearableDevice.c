@@ -2,7 +2,7 @@
  *    ======== wearableDevice.cpp ========
  */
 
-#include "wearableDevice.h"
+#include <stdio.h>
 #include <stddef.h>
 #include <unistd.h>
 #include <cstring>
@@ -25,15 +25,10 @@
 // #include <ti/drivers/PIN.h>
 #include <ti/drivers/I2C.h>
 #include <ti/display/Display.h>
+#include "wearableDevice.h"
 
 /* Library Header files */
 #include "bigtime.h"
-
-/* Devices Header files */
-#include "devices/dvMMA9553.h"
-//#include "devices/heartrate_3_click.h"
-//#include "SimpleKalmanFilter/SimpleKalmanFilter.h"
-#include <OledDisplay/WDsDisplay.h>
 
 //#define EVENT_INVALID_PACKET_RECEIVED (uint32_t)(1 << 1)
 
@@ -92,20 +87,6 @@ I2C_Params i2cParams;
 I2C_Transaction i2cTransaction;
 
 static Display_Handle display;
-WDsDisplay displayOLED(OLED_RESET);
-Clock clk(1);
-
-extern "C" {
-
-//void display_head(void);
-//void clock_main(void);
-//void heart_main(uint8_t rate);
-//void pedometer_show(int16_t stepCount);
-//int16_t pedometer_measurement(void);
-//void pedometer_main(void);
-//void checkDimOLED(uint8_t time);
-
-} // end extern "C"
 
 
 /*
@@ -141,7 +122,7 @@ void gpioButtonFxn0(uint_least8_t index){
  *  This may not be used for all boards.
  */
 void gpioButtonFxn1(uint_least8_t index){
-//    GPIO_toggle(Board_GPIO_LED1);
+    GPIO_toggle(Board_GPIO_LED1);
    // taskManager1.create_repeatThread(5);
    // seconds++;
    // if(seconds>59) seconds=0;
@@ -149,12 +130,12 @@ void gpioButtonFxn1(uint_least8_t index){
 
 void display_head(void){
     WDsDisplay__Clear_head();
-    WDsDisplay__setTextSize(1);
-    WDsDisplay__setTextColor(WHITE);
-    WDsDisplay__setCursor(40, 8);
-    WDsDisplay__print((uint8_t*)elementHead.text);
-    WDsDisplay__Bluetooth_icon(elementHead.bleIcon);
-    WDsDisplay__Battery_set(elementHead.batteryLevel);
+//    WDsDisplay__setTextSize(1);
+//    WDsDisplay__setTextColor(WHITE);
+//    WDsDisplay__setCursor(40, 8);
+//    WDsDisplay__print((uint8_t*)elementHead.text);
+//    WDsDisplay__Bluetooth_icon(elementHead.bleIcon);
+    WDsDisplay__Battery_charging();
     eventChange.head = true;
 }
 
@@ -163,9 +144,9 @@ void clock_main(uint32_t secs){
     static UInt32 seconds = 10; // different to Second_get() in initial running
     if(seconds != secs){
         seconds = secs;
-        clk.setSecond();
-        uint8_t hour = clk.getHour();
-        uint8_t min = clk.getMinute();
+        Clock_setSecond();
+        uint8_t hour = Clock_getHour();
+        uint8_t min = Clock_getMinute();
         WDsDisplay__Clear_body();
         WDsDisplay__Clock_set(hour, min);
         WDsDisplay__Colon_toogle();
@@ -192,7 +173,7 @@ void heart_show(uint8_t rate){
 }
 
 int16_t heart_measurement(uint16_t _next){
-    static uint16_t _heartRate = _next;
+    uint16_t _heartRate = _next;
     uint32_t count = 2000000;
     while(count--);
     _heartRate = Seconds_get()%100;
@@ -221,11 +202,11 @@ void pedometer_show(int16_t stepCount) {
 int16_t pedometer_measurement(){
     uint8_t Buf[20];
     static int16_t StepCount;
-    Pedometer_cmd_readstatus();
-    Pedometer_Read(Buf, 2);
+    pedometer_cmd_readstatus();
+    pedometer_Read(Buf, 2);
     if (Buf[1] == 0x80)
     {
-        Pedometer_Read(Buf, 16);
+        pedometer_Read(Buf, 16);
         StepCount = (Buf[6] <<8) | Buf[7];
     }
     return StepCount;
@@ -242,13 +223,15 @@ void pedometer_main(){
 }
 
 void checkDimOLED(uint8_t time){
-    static uint8_t _time = time;
+    uint8_t _time = time;
 }
 
 
 void HienThi_init(){
     WDsDisplay__begin(SSD1306_SWITCHCAPVCC, 0x3C);
     WDsDisplay__clearDisplay();
+//    AdafruitSSD1306_invertDisplay(1);
+//    WDsDisplay__Display_head();
     WDsDisplay__display();
 }
 
@@ -267,7 +250,7 @@ void HienThi_showHead(void){
  * */
 void HienThi_showBody(uint8_t mode){
     switch(mode){
-        case 0:  clock_main(timestamp); break;
+        case 0:  break;//clock_main(timestamp); break;
         case 1:  heart_main(); break;
         case 2:  pedometer_main(); break;
         case 3:  break;
@@ -318,12 +301,13 @@ static void mainTaskStructFunction(UArg arg0, UArg arg1){
     }else
         Display_printf(display, 0, 0, "I2C Initialized!\n");
 
+    Clock_init(1);
     WDsDisplay__init(OLED_RESET);
     HienThi_init();
-    Pedometer_init();
+    pedometer_init();
     elementHead.bleIcon = true;
-    std::strcpy( elementHead.text, "MEMSITECH");
-    elementHead.batteryLevel = 50;
+    strcpy( elementHead.text, "MEMSITECH");
+    elementHead.batteryLevel = 90;
 
     while(1){
         /* Wait for event */
@@ -354,9 +338,10 @@ static void mainTaskStructFunction(UArg arg0, UArg arg1){
 }
 
 void countSleepTaskStructFunction(UArg arg0, UArg arg1){
+    int i = 0;
     while(true){
         Semaphore_pend(sem1Handle, BIOS_WAIT_FOREVER);
-        for(int i=0; i<50; i++){
+        for(i=0; i<50; i++){
             if (!enableSleep) break;
             Task_sleep(10000);
             if(i==49)
@@ -373,7 +358,7 @@ void mainClockTaskStructFunction(UArg arg0, UArg arg1){
 }
 
 void primaryTaskStructFunction(UArg arg0, UArg arg1){
-    static uint16_t _temp = 50;
+    uint16_t _temp = 50;
     while(true){
         if (Semaphore_pend(sem0Handle, BIOS_WAIT_FOREVER))
         {
@@ -428,12 +413,12 @@ void wearableDevice_init(){
     mainTaskParams.priority = MAINTASK_PRIORITY;
     mainTaskParams.stack = &mainTaskStack;
     Task_construct(&mainTaskStruct, mainTaskStructFunction, &mainTaskParams, NULL);
-    mainTaskHandle = Task_Handle(&mainTaskStruct);
+//    mainTaskHandle = Task_Handle(&mainTaskStruct);
 
     mainTaskParams.priority = PRIMARYTASK_PRIORITY;
     mainTaskParams.stack = &primaryTaskStack;
     Task_construct(&primaryTaskStruct, primaryTaskStructFunction, &mainTaskParams, NULL);    
-    primaryTaskHandle = Task_Handle(&primaryTaskStruct);
+//    primaryTaskHandle = Task_Handle(&primaryTaskStruct);
    
     /* Create the count sleep task */ 
     Task_Params_init(&countSleepTaskParams);

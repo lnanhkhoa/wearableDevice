@@ -11,9 +11,9 @@ void pedometer_init(void){
         pedometer_int0_enable();    
         pedometer_active();        
         pedometer_wakeup();
-        pedometer_delay_mma9553();
+        delay_mma9553();
         pedometer_afe_config();
-        pedometer_delay_mma9553();
+        delay_mma9553();
         pedometer_afe_config_read();
 }
 
@@ -124,18 +124,19 @@ void pedometer_Write(uint8_t *buffer, uint8_t len){
 }
 
 
-void pedometer_dvMMA9553_Read(uint8_t deviceAddr, uint8_t regAddr, uint8_t *data, uint8_t len){
+void dvMMA9553_Read(uint8_t deviceAddr, uint8_t regAddr, uint8_t *data, uint8_t len){
     I2c_ReadRegister( deviceAddr, regAddr, data, len);
 }
 
 
-void pedometer_dvMMA9553_Write( uint8_t deviceAddr, uint8_t regAddr, uint8_t *data, uint8_t len){
+void dvMMA9553_Write( uint8_t deviceAddr, uint8_t regAddr, uint8_t *data, uint8_t len){
     I2c_WriteRegister(deviceAddr, regAddr, data, len);
 }
 
 
-void pedometer_delay_mma9553(void){
-    for (int i = 0; i < 400; ++i)
+void delay_mma9553(void){
+    int i;
+    for (i = 0; i < 400; ++i)
     {
         /* code */
     }

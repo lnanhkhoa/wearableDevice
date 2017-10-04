@@ -5,22 +5,22 @@
 SHELL = cmd.exe
 
 # Add inputs and outputs from these tool invocations to the build variables 
-CPP_SRCS += \
-../devices/dvMMA9553.cpp 
+C_SRCS += \
+../devices/dvMMA9553.c 
+
+C_DEPS += \
+./devices/dvMMA9553.d 
 
 OBJS += \
 ./devices/dvMMA9553.obj 
 
-CPP_DEPS += \
-./devices/dvMMA9553.d 
-
 OBJS__QUOTED += \
 "devices\dvMMA9553.obj" 
 
-CPP_DEPS__QUOTED += \
+C_DEPS__QUOTED += \
 "devices\dvMMA9553.d" 
 
-CPP_SRCS__QUOTED += \
-"../devices/dvMMA9553.cpp" 
+C_SRCS__QUOTED += \
+"../devices/dvMMA9553.c" 
 
 

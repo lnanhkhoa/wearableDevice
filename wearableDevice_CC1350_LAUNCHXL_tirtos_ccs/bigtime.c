@@ -34,6 +34,11 @@
  *  ======== bigtime.c ========
  */
 
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+
+
 /* XDC module Headers */
 // #include <xdc/std.h>
 // #include <xdc/runtime/Diags.h>
@@ -53,17 +58,29 @@
 // Task_Struct task0Struct;
 // Char task0Stack[TASKSTACKSIZE];
 
-// #include "bigtime.h"
+ #include "bigtime.h"
 
 const char *months[12] = { "January", "February", "March",
                            "April",   "May",      "June",
                            "July",    "August",   "September",
                            "October", "November", "December" };
 
+int id;
+int microsecond;
+int millisecond;
+int second;
+int minute;
+int hour;
+int day;
+int month;
+int year;
+int century;
+int millenium;
+
 /*
  * Clock methods
  */
-void Clock_Clock(int newId)
+void Clock_init(int newId)
 {
     id = newId;
     microsecond = 0;
@@ -105,7 +122,7 @@ void Clock_setMillisecond()
     return;
 }
 
-void Clock_setMillisecond(int nMilliseconds)
+void Clock_setMillisecond_inputnMil(int nMilliseconds)
 {
     int secs;
 
@@ -123,7 +140,7 @@ void Clock_setMillisecond(int nMilliseconds)
 void Clock_setSecond()
 {
     if (second == 59) {
-        setMinute();
+        Clock_setMinute();
         second = 0;
     }
     else {
@@ -136,7 +153,7 @@ void Clock_setSecond()
 void Clock_setMinute()
 {
     if (minute == 59) {
-        setHour();
+        Clock_setHour();
         minute = 0;
     }
     else {
@@ -149,7 +166,7 @@ void Clock_setMinute()
 void Clock_setHour()
 {
     if (hour == 23) {
-        setDay();
+        Clock_setDay();
         hour = 0;
     }
     else {
@@ -186,19 +203,19 @@ void Clock_setDay()
     }
 
     if ((day == 28) && (feb) && (!leap)) {
-        setMonth();
+        Clock_setMonth();
         day = 1;
     }
     else if ((day == 29) && (feb) && (leap)) {
-        setMonth();
+        Clock_setMonth();
         day = 1;
     }
     else if ((day == 30) && (thirtydays == true)) {
-        setMonth();
+        Clock_setMonth();
         day = 1;
     }
     else if ((day == 31) && (thirtydays == false)) {
-        setMonth();
+        Clock_setMonth();
         day = 1;
     }
     else {
@@ -211,7 +228,7 @@ void Clock_setDay()
 void Clock_setMonth()
 {
     if (month >= 12) {
-        setYear();
+        Clock_setYear();
         month = 1;
     }
     else {
@@ -225,7 +242,7 @@ void Clock_setYear()
 {
     year++;
     if ((year%100) == 0) {
-        setCentury();
+        Clock_setCentury();
     }
 
     return;
@@ -235,7 +252,7 @@ void Clock_setCentury()
 {
     century++;
     if ((century%10) == 0) {
-        setMillenium();
+        Clock_setMillenium();
     }
 
     return;

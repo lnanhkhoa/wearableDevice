@@ -362,7 +362,7 @@ GPIO_PinConfig gpioPinConfigs[] = {
 /*
  * Array of callback function pointers
  * NOTE: The order of the pin configurations must coincide with what was
- *       defined in CC1350_LAUNCH.h
+ *       defined in CC1350_LAUNCHXL.h
  * NOTE: Pins not used for interrupts can be omitted from callbacks array to
  *       reduce memory usage (if placed at end of gpioPinConfigs array).
  */
@@ -446,10 +446,12 @@ const uint_least8_t I2C_count = CC1350_LAUNCHXL_I2CCOUNT;
 #include <ti/drivers/nvs/NVSSPI25X.h>
 #include <ti/drivers/nvs/NVSCC26XX.h>
 
-#define SECTORSIZE 0x1000
 #define NVS_REGIONS_BASE 0x1B000
+#define SECTORSIZE       0x1000
+#define REGIONSIZE       (SECTORSIZE * 4)
+#define VERIFYBUFSIZE    64
 
-static uint8_t verifyBuf[64];
+static uint8_t verifyBuf[VERIFYBUFSIZE];
 
 /*
  * Reserve flash sectors for NVS driver use by placing an uninitialized byte
@@ -462,24 +464,29 @@ static uint8_t verifyBuf[64];
  */
 #pragma LOCATION(flashBuf, NVS_REGIONS_BASE);
 #pragma NOINIT(flashBuf);
-static char flashBuf[SECTORSIZE * 4];
+static char flashBuf[REGIONSIZE];
 
 #elif defined(__IAR_SYSTEMS_ICC__)
 
 /*
  * Place uninitialized array at NVS_REGIONS_BASE
  */
-__no_init static char flashBuf[SECTORSIZE * 4] @ NVS_REGIONS_BASE;
+__no_init static char flashBuf[REGIONSIZE] @ NVS_REGIONS_BASE;
 
 #elif defined(__GNUC__)
 
 /*
- * Place the reserved flash buffers in the .nvs section.
- * The nvs section will be placed at address NVS_REGIONS_BASE by
- * the gcc linker cmd file.
+ * Place the flash buffers in the .nvs section created in the gcc linker file.
+ * The .nvs section enforces alignment on a sector boundary but may
+ * be placed anywhere in flash memory.  If desired the .nvs section can be set
+ * to a fixed address by changing the following in the gcc linker file:
+ *
+ * .nvs (FIXED_FLASH_ADDR) (NOLOAD) : AT (FIXED_FLASH_ADDR) {
+ *      *(.nvs)
+ * } > REGION_TEXT
  */
 __attribute__ ((section (".nvs")))
-static char flashBuf[SECTORSIZE * 4];
+static char flashBuf[REGIONSIZE];
 
 #endif
 
@@ -491,7 +498,7 @@ NVSSPI25X_Object nvsSPI25XObjects[1];
 const NVSCC26XX_HWAttrs nvsCC26xxHWAttrs[1] = {
     {
         .regionBase = (void *)flashBuf,
-        .regionSize = SECTORSIZE * 4,
+        .regionSize = REGIONSIZE,
     },
 };
 
@@ -499,10 +506,10 @@ const NVSCC26XX_HWAttrs nvsCC26xxHWAttrs[1] = {
 const NVSSPI25X_HWAttrs nvsSPI25XHWAttrs[1] = {
     {
         .regionBaseOffset = 0,
-        .regionSize = SECTORSIZE * 4,
+        .regionSize = REGIONSIZE,
         .sectorSize = SECTORSIZE,
         .verifyBuf = verifyBuf,
-        .verifyBufSize = 64,
+        .verifyBufSize = VERIFYBUFSIZE,
         .spiHandle = NULL,
         .spiIndex = 0,
         .spiBitRate = 4000000,
@@ -636,7 +643,8 @@ const SPICC26XXDMA_HWAttrsV1 spiCC26XXDMAHWAttrs[CC1350_LAUNCHXL_SPICOUNT] = {
         .mosiPin            = CC1350_LAUNCHXL_SPI0_MOSI,
         .misoPin            = CC1350_LAUNCHXL_SPI0_MISO,
         .clkPin             = CC1350_LAUNCHXL_SPI0_CLK,
-        .csnPin             = CC1350_LAUNCHXL_SPI0_CSN
+        .csnPin             = CC1350_LAUNCHXL_SPI0_CSN,
+        .minDmaTransferSize = 10
     },
     {
         .baseAddr           = SSI1_BASE,
@@ -650,7 +658,8 @@ const SPICC26XXDMA_HWAttrsV1 spiCC26XXDMAHWAttrs[CC1350_LAUNCHXL_SPICOUNT] = {
         .mosiPin            = CC1350_LAUNCHXL_SPI1_MOSI,
         .misoPin            = CC1350_LAUNCHXL_SPI1_MISO,
         .clkPin             = CC1350_LAUNCHXL_SPI1_CLK,
-        .csnPin             = CC1350_LAUNCHXL_SPI1_CSN
+        .csnPin             = CC1350_LAUNCHXL_SPI1_CSN,
+        .minDmaTransferSize = 10
     }
 };
 
@@ -677,6 +686,8 @@ const uint_least8_t SPI_count = CC1350_LAUNCHXL_SPICOUNT;
 
 UARTCC26XX_Object uartCC26XXObjects[CC1350_LAUNCHXL_UARTCOUNT];
 
+uint8_t uartCC26XXRingBuffer[CC1350_LAUNCHXL_UARTCOUNT][32];
+
 const UARTCC26XX_HWAttrsV2 uartCC26XXHWAttrs[CC1350_LAUNCHXL_UARTCOUNT] = {
     {
         .baseAddr       = UART0_BASE,
@@ -687,7 +698,9 @@ const UARTCC26XX_HWAttrsV2 uartCC26XXHWAttrs[CC1350_LAUNCHXL_UARTCOUNT] = {
         .txPin          = CC1350_LAUNCHXL_UART_TX,
         .rxPin          = CC1350_LAUNCHXL_UART_RX,
         .ctsPin         = PIN_UNASSIGNED,
-        .rtsPin         = PIN_UNASSIGNED
+        .rtsPin         = PIN_UNASSIGNED,
+        .ringBufPtr     = uartCC26XXRingBuffer[CC1350_LAUNCHXL_UART0],
+        .ringBufSize    = sizeof(uartCC26XXRingBuffer[CC1350_LAUNCHXL_UART0])
     }
 };
 

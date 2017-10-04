@@ -144,15 +144,15 @@ extern void (*P_write)(uint8_t);
 
     // void AdafruitSSD1306_init(int8_t SID, int8_t SCLK, int8_t DC, int8_t RST, int8_t CS);
     // void AdafruitSSD1306_init(int8_t DC, int8_t RST, int8_t CS);
-    void AdafruitSSD1306_init(int8_t RST = -1);
+    void AdafruitSSD1306_init( int8_t RST);
 
-    void AdafruitSSD1306_begin(uint8_t switchvcc = SSD1306_SWITCHCAPVCC, uint8_t i2caddr = SSD1306_I2C_ADDRESS, bool reset=true);
+    void AdafruitSSD1306_begin(int8_t vccstate, int8_t i2caddr, bool reset);
     void ssd1306_command(uint8_t c);
 
     void AdafruitSSD1306_clearDisplay(void);
     void AdafruitSSD1306_invertDisplay(uint8_t i);
     void AdafruitSSD1306_display(void);
-    void AdafruitSSD1306_display(uint8_t startPage, uint8_t endPage);
+    void AdafruitSSD1306_displayPage(uint8_t startPage, uint8_t endPage);
 
     void AdafruitSSD1306_startscrollright(uint8_t start, uint8_t stop);
     void AdafruitSSD1306_startscrollleft(uint8_t start, uint8_t stop);
@@ -175,15 +175,19 @@ extern void (*P_write)(uint8_t);
     void AdafruitSSD1306_drawFastHLineInternal(int16_t x, int16_t y, int16_t w, uint16_t color) __attribute__((always_inline));
 
 /*************************************************************************************************************************************/
-    extern void (*P_drawBitmap)(int16_t , int16_t , const unsigned char *, int16_t , int16_t , uint16_t );
-    void AdafruitSSD1306_drawBitmap(int16_t x, int16_t y, const unsigned char bitmap[], int16_t w, int16_t h, uint16_t color);
+    void AdafruitSSD1306_drawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg);
 
     extern void (*P_setCursor)(int16_t , int16_t ),
                 (*P_setTextColor)(uint16_t ),
                 (*P_setTextSize)(uint8_t );
 
-    void AdafruitGFX_setCursor(int16_t x, int16_t y);
-    void AdafruitGFX_setTextColor(uint16_t c);
-    void AdafruitGFX_setTextSize(uint8_t s);
+    void AdafruitSSD1306_setCursor(int16_t x, int16_t y);
+    void AdafruitSSD1306_setTextColor(uint16_t c);
+    void AdafruitSSD1306_setTextSize(uint8_t s);
+    void AdafruitSSD1306_fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
+    void AdafruitSSD1306_print(uint8_t *str);
+
+    int16_t AdafruitSSD1306_height(void);
+    int16_t AdafruitSSD1306_width(void);
 
 #endif /* _AdafruitSSD1306_H_ */

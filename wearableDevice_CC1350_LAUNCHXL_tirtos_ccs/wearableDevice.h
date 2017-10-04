@@ -4,7 +4,15 @@
 #ifndef TASKS_WEARABLEDEVICE_H_
 #define TASKS_WEARABLEDEVICE_H_
 
-#include "stdint.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+
+/* Devices Header files */
+#include "devices/dvMMA9553.h"
+//#include "devices/heartrate_3_click.h"
+//#include "SimpleKalmanFilter/SimpleKalmanFilter.h"
+#include "OledDisplay/WDsDisplay.h"
 
 
 #define EVENT_ALL                           0xFFFFFFFF
@@ -23,7 +31,17 @@
 #define YPOS 1
 #define DELTAY 2
 
+#define TASKSTACKSIZE           1024
+#define MAINTASK_PRIORITY       4
+#define PRIMARYTASK_PRIORITY    3
+#define COUNTSLEEPTASK_PRIORITY 2
 
+#define Display_ON true
+#define Display_OFF false
+
+#define BLACK 0
+#define WHITE 1
+#define INVERSE 2
 
 // #if (SSD1306_LCDHEIGHT != 64)
 // #error("Height incorrect, please fix Adafruit_SSD1306.h!");

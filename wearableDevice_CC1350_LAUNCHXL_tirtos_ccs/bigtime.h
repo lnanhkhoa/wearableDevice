@@ -7,17 +7,6 @@
 #define __BIGTIME_H__
 
 /* data */
-int id;
-int microsecond;
-int millisecond;
-int second;
-int minute;
-int hour;
-int day;
-int month;
-int year;
-int century;
-int millenium;
 
     void Clock_init(int newId);  // Constructor
 
@@ -36,7 +25,7 @@ int millenium;
 
     void Clock_setMicrosecond();
     void Clock_setMillisecond();
-    void Clock_setMillisecond(int nMilliseconds);
+    void Clock_setMillisecond_inputnMil(int nMilliseconds);
     void Clock_setSecond();
     void Clock_setMinute();
     void Clock_setHour();

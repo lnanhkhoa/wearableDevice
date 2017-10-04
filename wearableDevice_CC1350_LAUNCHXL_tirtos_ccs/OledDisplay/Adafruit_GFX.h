@@ -1,8 +1,12 @@
 #ifndef _AdafruitGFX_H
 #define _AdafruitGFX_H
 
+#include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
+
 #include "gfxfont.h"
+#include "glcdfont.h"
 
 #define boolean bool
 
@@ -72,12 +76,11 @@
     AdafruitGFX_drawRoundRect(int16_t x0, int16_t y0, int16_t w, int16_t h, int16_t radius, uint16_t color),
     AdafruitGFX_fillRoundRect(int16_t x0, int16_t y0, int16_t w, int16_t h, int16_t radius, uint16_t color),
     
-    (*P_drawBitmap)(int16_t , int16_t , const unsigned char *, int16_t , int16_t , uint16_t );
 
-    AdafruitGFX_drawBitmap(int16_t x, int16_t y, const unsigned char bitmap[], int16_t w, int16_t h, uint16_t color),
-    // AdafruitGFX_drawBitmap(int16_t x, int16_t y, const uint8_t bitmap[], int16_t w, int16_t h, uint16_t color, uint16_t bg),
+    // AdafruitGFX_drawBitmap(int16_t x, int16_t y, const unsigned char bitmap[], int16_t w, int16_t h, uint16_t color),
+     // AdafruitGFX_drawBitmap(int16_t x, int16_t y, const uint8_t bitmap[], int16_t w, int16_t h, uint16_t color, uint16_t bg),
     // AdafruitGFX_drawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w, int16_t h, uint16_t color),
-    // AdafruitGFX_drawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg),
+    AdafruitGFX_drawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg),
     // AdafruitGFX_drawXBitmap(int16_t x, int16_t y, const uint8_t bitmap[], int16_t w, int16_t h, uint16_t color),
     
     AdafruitGFX_drawGrayscaleBitmap(int16_t x, int16_t y, const uint8_t bitmap[], int16_t w, int16_t h),
@@ -100,8 +103,8 @@
     AdafruitGFX_setTextColor(uint16_t c),
     AdafruitGFX_setTextSize(uint8_t s),
     AdafruitGFX_setTextWrap(boolean w),
-    AdafruitGFX_cp437(boolean x=true),
-    AdafruitGFX_setFont(const GFXfont *f = 0),
+    AdafruitGFX_cp437(boolean x),
+    AdafruitGFX_setFont(const GFXfont *f),
     AdafruitGFX_getTextBounds(char *string, int16_t x, int16_t y, int16_t *x1, int16_t *y1, uint16_t *w, uint16_t *h);
    // AdafruitGFX_charBounds(const __FlashStringHelper *s, int16_t x, int16_t y, int16_t *x1, int16_t *y1, uint16_t *w, uint16_t *h);
 
@@ -110,14 +113,14 @@
 
     void AdafruitGFX_print(uint8_t *str);
     // void AdafruitGFX_print(char c);
-    int16_t AdafruitGFX_height(void) const;
-    int16_t AdafruitGFX_width(void) const;
+    int16_t AdafruitGFX_height(void);
+    int16_t AdafruitGFX_width(void);
 
-    uint8_t AdafruitGFX_getRotation(void) const;
+    uint8_t AdafruitGFX_getRotation(void);
 
     // get current cursor position (get rotation safe maximum values, using: width() for x, height() for y)
-    int16_t AdafruitGFX_getCursorX(void) const;
-    int16_t AdafruitGFX_getCursorY(void) const;
+    int16_t AdafruitGFX_getCursorX(void);
+    int16_t AdafruitGFX_getCursorY(void);
 
     void AdafruitGFX_charBounds(char c, int16_t *x, int16_t *y, int16_t *minx, int16_t *miny, int16_t *maxx, int16_t *maxy);
   

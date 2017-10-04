@@ -1,3 +1,8 @@
+---
+# i2ctmp007
+
+---
+
 ## Example Summary
 
 Sample application to read temperature value from a TMP007 I2C temperature
@@ -20,6 +25,9 @@ Depending on your board, there will either be an onboard TMP007 sensor, or
 you will need the Sensors Boosterpack.
 
 ## Example Usage
+
+* Example output is generated through use of Display driver APIs. Refer to the
+Display driver documentation found in the SimpleLink MCU SDK User's Guide.
 
 * Open a serial session (e.g. [`PuTTY`](http://www.putty.org/ "PuTTY's
  Homepage"), etc.) to the appropriate COM port.

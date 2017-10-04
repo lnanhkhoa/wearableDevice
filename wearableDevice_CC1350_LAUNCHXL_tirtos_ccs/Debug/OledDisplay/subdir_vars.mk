@@ -6,10 +6,17 @@ SHELL = cmd.exe
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../OledDisplay/Adafruit_GFX.cpp \
-../OledDisplay/Adafruit_SSD1306.cpp \
-../OledDisplay/WDsDisplay.cpp \
 ../OledDisplay/minitransfer.cpp 
+
+C_SRCS += \
+../OledDisplay/Adafruit_GFX.c \
+../OledDisplay/Adafruit_SSD1306.c \
+../OledDisplay/WDsDisplay.c 
+
+C_DEPS += \
+./OledDisplay/Adafruit_GFX.d \
+./OledDisplay/Adafruit_SSD1306.d \
+./OledDisplay/WDsDisplay.d 
 
 OBJS += \
 ./OledDisplay/Adafruit_GFX.obj \
@@ -18,9 +25,6 @@ OBJS += \
 ./OledDisplay/minitransfer.obj 
 
 CPP_DEPS += \
-./OledDisplay/Adafruit_GFX.d \
-./OledDisplay/Adafruit_SSD1306.d \
-./OledDisplay/WDsDisplay.d \
 ./OledDisplay/minitransfer.d 
 
 OBJS__QUOTED += \
@@ -29,16 +33,20 @@ OBJS__QUOTED += \
 "OledDisplay\WDsDisplay.obj" \
 "OledDisplay\minitransfer.obj" 
 
-CPP_DEPS__QUOTED += \
+C_DEPS__QUOTED += \
 "OledDisplay\Adafruit_GFX.d" \
 "OledDisplay\Adafruit_SSD1306.d" \
-"OledDisplay\WDsDisplay.d" \
+"OledDisplay\WDsDisplay.d" 
+
+CPP_DEPS__QUOTED += \
 "OledDisplay\minitransfer.d" 
 
+C_SRCS__QUOTED += \
+"../OledDisplay/Adafruit_GFX.c" \
+"../OledDisplay/Adafruit_SSD1306.c" \
+"../OledDisplay/WDsDisplay.c" 
+
 CPP_SRCS__QUOTED += \
-"../OledDisplay/Adafruit_GFX.cpp" \
-"../OledDisplay/Adafruit_SSD1306.cpp" \
-"../OledDisplay/WDsDisplay.cpp" \
 "../OledDisplay/minitransfer.cpp" 
 
 

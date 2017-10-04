@@ -5,22 +5,22 @@
 SHELL = cmd.exe
 
 # Add inputs and outputs from these tool invocations to the build variables 
-CPP_SRCS += \
-../devices/i2ctransfer/i2ctransfer.cpp 
+C_SRCS += \
+../devices/i2ctransfer/i2ctransfer.c 
+
+C_DEPS += \
+./devices/i2ctransfer/i2ctransfer.d 
 
 OBJS += \
 ./devices/i2ctransfer/i2ctransfer.obj 
 
-CPP_DEPS += \
-./devices/i2ctransfer/i2ctransfer.d 
-
 OBJS__QUOTED += \
 "devices\i2ctransfer\i2ctransfer.obj" 
 
-CPP_DEPS__QUOTED += \
+C_DEPS__QUOTED += \
 "devices\i2ctransfer\i2ctransfer.d" 
 
-CPP_SRCS__QUOTED += \
-"../devices/i2ctransfer/i2ctransfer.cpp" 
+C_SRCS__QUOTED += \
+"../devices/i2ctransfer/i2ctransfer.c" 
 
 

@@ -36,8 +36,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include <math.h>
 
-#include "AdafruitGFX.h"
-#include "glcdfont.h"
+#include "Adafruit_GFX.h"
 
 #ifndef pgm_read_byte
  #define pgm_read_byte(addr) (*(const unsigned char *)(addr))
@@ -75,47 +74,6 @@ boolean wrap,   // If set, 'wrap' text at right edge of display
       _cp437; // If set, use correct CP437 charset (default is off)
 GFXfont *gfxFont;
 
-
-void AdafruitGFX_init(int16_t w, int16_t h){
-    WIDTH = w;
-    HEIGHT = h;
-    _width    = WIDTH;
-    _height   = HEIGHT;
-    rotation  = 0;
-    cursor_y  = cursor_x    = 0;
-    textsize  = 1;
-    textcolor = textbgcolor = 0xFFFF;
-    wrap      = true;
-    _cp437    = false;
-    gfxFont   = NULL;
-
-    P_drawPixel         = AdafruitGFX_drawPixel;
-
-    P_startwrite        = AdafruitGFX_startwrite;
-    P_writePixel        = AdafruitGFX_writePixel;
-    P_writeFillRect     = AdafruitGFX_writeFillRect;
-    P_writeFastVLine    = AdafruitGFX_writeFastVLine;
-    P_writeFastHLine    = AdafruitGFX_writeFastHLine;
-    P_writeLine         = AdafruitGFX_writeLine;
-    P_endwrite          = AdafruitGFX_endwrite;
-
-    PsetRotation        = AdafruitGFX_setRotation;
-
-    P_drawFastVLine     = AdafruitGFX_drawFastVLine;
-    P_drawFastHLine     = AdafruitGFX_drawFastHLine;
-    P_fillRect          = AdafruitGFX_fillRect;
-    P_fillScreen        = AdafruitGFX_fillScreen;
-    P_drawLine          = AdafruitGFX_drawLine;
-    P_drawRect          = AdafruitGFX_drawRect;
-
-    P_write             = AdafruitGFX_write;
-
-    P_drawBitmap        = AdafruitGFX_drawBitmap;
-    P_setCursor         = AdafruitGFX_setCursor;
-    P_setTextColor      = AdafruitGFX_setTextColor;
-    P_setTextSize       = AdafruitGFX_setTextSize;
-
-}
 
 // Bresenham's algorithm - thx wikpedia
 void AdafruitGFX_writeLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color) {
@@ -167,7 +125,7 @@ void AdafruitGFX_startwrite(){
 
 void AdafruitGFX_writePixel(int16_t x, int16_t y, uint16_t color){
     // OverAdafruitGFX_write in subclasses if AdafruitGFX_startwrite is defined!
-    AdafruitGFX_drawPixel(x, y, color);
+    P_drawPixel(x, y, color);
 }
 
 // (x,y) is topmost point; if unsure, calling function
@@ -176,7 +134,7 @@ void AdafruitGFX_writeFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color)
     // OverAdafruitGFX_write in subclasses if AdafruitGFX_startwrite is defined!
     // Can be just AdafruitGFX_writeLine(x, y, x, y+h-1, color);
     // or AdafruitGFX_writeFillRect(x, y, 1, h, color);
-    AdafruitGFX_drawFastVLine(x, y, h, color);
+    P_drawFastVLine(x, y, h, color);
 }
 
 // (x,y) is leftmost point; if unsure, calling function
@@ -185,7 +143,7 @@ void AdafruitGFX_writeFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color)
     // OverAdafruitGFX_write in subclasses if AdafruitGFX_startwrite is defined!
     // Example: AdafruitGFX_writeLine(x, y, x+w-1, y, color);
     // or AdafruitGFX_writeFillRect(x, y, w, 1, color);
-    AdafruitGFX_drawFastHLine(x, y, w, color);
+    P_drawFastHLine(x, y, w, color);
 }
 
 void AdafruitGFX_writeFillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
@@ -218,7 +176,8 @@ void AdafruitGFX_drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) 
 void AdafruitGFX_fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
     // Update in subclasses if desired!
     AdafruitGFX_startwrite();
-    for (int16_t i=x; i<x+w; i++) {
+    int16_t i;
+    for (i=x; i<x+w; i++) {
         AdafruitGFX_writeFastVLine(i, y, h, color);
     }
     AdafruitGFX_endwrite();
@@ -233,10 +192,10 @@ void AdafruitGFX_drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16
     // Update in subclasses if desired!
     if(x0 == x1){
         if(y0 > y1) _swap_int16_t(y0, y1);
-        AdafruitGFX_drawFastVLine(x0, y0, y1 - y0 + 1, color);
+        P_drawFastVLine(x0, y0, y1 - y0 + 1, color);
     } else if(y0 == y1){
         if(x0 > x1) _swap_int16_t(x0, x1);
-        AdafruitGFX_drawFastHLine(x0, y0, x1 - x0 + 1, color);
+        P_drawFastHLine(x0, y0, x1 - x0 + 1, color);
     } else {
         AdafruitGFX_startwrite();
         AdafruitGFX_writeLine(x0, y0, x1, y1, color);
@@ -476,19 +435,20 @@ void AdafruitGFX_fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, in
     }
     AdafruitGFX_endwrite();
 }
+/*
 
 // BITMAP / XBITMAP / GRAYSCALE / RGB BITMAP FUNCTIONS ---------------------
 
 // Draw a PROGMEM-resident 1-bit image at the specified (x,y) position,
 // using the specified foreground color (unset bits are transparent).
-void AdafruitGFX_drawBitmap(int16_t x, int16_t y, const uint8_t bitmap[], int16_t w, int16_t h, uint16_t color) {
+void AdafruitGFX_drawBitmap(int16_t x, int16_t y, const unsigned char bitmap[], int16_t w, int16_t h, uint16_t color){
 
     int16_t byteWidth = (w + 7) / 8; // Bitmap scanline pad = whole byte
     uint8_t byte = 0;
-
+    int16_t i,j;
     AdafruitGFX_startwrite();
-    for(int16_t j=0; j<h; j++, y++) {
-        for(int16_t i=0; i<w; i++) {
+    for(j=0; j<h; j++, y++) {
+        for(i=0; i<w; i++) {
             if(i & 7) byte <<= 1;
             else      byte   = pgm_read_byte(&bitmap[j * byteWidth + i / 8]);
             if(byte & 0x80) AdafruitGFX_writePixel(x+i, y, color);
@@ -497,25 +457,27 @@ void AdafruitGFX_drawBitmap(int16_t x, int16_t y, const uint8_t bitmap[], int16_
     AdafruitGFX_endwrite();
 }
 
+*/
 // Draw a PROGMEM-resident 1-bit image at the specified (x,y) position,
 // using the specified foreground (for set bits) and background (unset
 // bits) colors.
-void AdafruitGFX_drawBitmap(int16_t x, int16_t y, const uint8_t bitmap[], int16_t w, int16_t h, uint16_t color, uint16_t bg) {
+// void AdafruitGFX_drawBitmap(int16_t x, int16_t y, const uint8_t bitmap[], int16_t w, int16_t h, uint16_t color, uint16_t bg) {
 
-    int16_t byteWidth = (w + 7) / 8; // Bitmap scanline pad = whole byte
-    uint8_t byte = 0;
+//     int16_t byteWidth = (w + 7) / 8; // Bitmap scanline pad = whole byte
+//     uint8_t byte = 0;
+//     int16_t i, j;
+//     AdafruitGFX_startwrite();
+//     for(j=0; j<h; j++, y++) {
+//         for(i=0; i<w; i++ ) {
+//             if(i & 7) byte <<= 1;
+//             else      byte   = pgm_read_byte(&bitmap[j * byteWidth + i / 8]);
+//             AdafruitGFX_writePixel(x+i, y, (byte & 0x80) ? color : bg);
+//         }
+//     }
+//     AdafruitGFX_endwrite();
+// }
 
-    AdafruitGFX_startwrite();
-    for(int16_t j=0; j<h; j++, y++) {
-        for(int16_t i=0; i<w; i++ ) {
-            if(i & 7) byte <<= 1;
-            else      byte   = pgm_read_byte(&bitmap[j * byteWidth + i / 8]);
-            AdafruitGFX_writePixel(x+i, y, (byte & 0x80) ? color : bg);
-        }
-    }
-    AdafruitGFX_endwrite();
-}
-
+/*
 // Draw a RAM-resident 1-bit image at the specified (x,y) position,
 // using the specified foreground color (unset bits are transparent).
 void AdafruitGFX_drawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w, int16_t h, uint16_t color) {
@@ -532,6 +494,7 @@ void AdafruitGFX_drawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w, in
     }
     AdafruitGFX_endwrite();
 }
+*/
 
 // Draw a RAM-resident 1-bit image at the specified (x,y) position,
 // using the specified foreground (for set bits) and background (unset
@@ -540,10 +503,11 @@ void AdafruitGFX_drawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w, in
 
     int16_t byteWidth = (w + 7) / 8; // Bitmap scanline pad = whole byte
     uint8_t byte = 0;
+    int16_t i, j;
 
     AdafruitGFX_startwrite();
-    for(int16_t j=0; j<h; j++, y++) {
-        for(int16_t i=0; i<w; i++ ) {
+    for(j=0; j<h; j++, y++) {
+        for(i=0; i<w; i++ ) {
             if(i & 7) byte <<= 1;
             else      byte   = bitmap[j * byteWidth + i / 8];
             AdafruitGFX_writePixel(x+i, y, (byte & 0x80) ? color : bg);
@@ -551,7 +515,7 @@ void AdafruitGFX_drawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w, in
     }
     AdafruitGFX_endwrite();
 }
-
+/*
 // Draw PROGMEM-resident XBitMap Files (*.xbm), exported from GIMP,
 // Usage: Export from GIMP to *.xbm, rename *.xbm to *.c and open in editor.
 // C Array can be directly used with this function.
@@ -574,15 +538,15 @@ void AdafruitGFX_drawXBitmap(int16_t x, int16_t y, const uint8_t bitmap[], int16
     }
     AdafruitGFX_endwrite();
 }
-
+*/
 // Draw a PROGMEM-resident 8-bit image (grayscale) at the specified (x,y)
 // pos.  Specifically for 8-bit display devices such as IS31FL3731;
 // no color reduction/expansion is performed.
-void AdafruitGFX_drawGrayscaleBitmap(int16_t x, int16_t y,
-  const uint8_t bitmap[], int16_t w, int16_t h) {
+void AdafruitGFX_drawGrayscaleBitmap(int16_t x, int16_t y, const uint8_t bitmap[], int16_t w, int16_t h) {
+    int16_t i, j;
     AdafruitGFX_startwrite();
-    for(int16_t j=0; j<h; j++, y++) {
-        for(int16_t i=0; i<w; i++ ) {
+    for(j=0; j<h; j++, y++) {
+        for(i=0; i<w; i++ ) {
             AdafruitGFX_writePixel(x+i, y, (uint8_t)pgm_read_byte(&bitmap[j * w + i]));
         }
     }
@@ -653,11 +617,11 @@ void AdafruitGFX_drawGrayscaleBitmap(int16_t x, int16_t y,
 
 // Draw a PROGMEM-resident 16-bit image (RGB 5/6/5) at the specified (x,y)
 // position.  For 16-bit display devices; no color reduction performed.
-void AdafruitGFX_drawRGBBitmap(int16_t x, int16_t y,
-  const uint16_t bitmap[], int16_t w, int16_t h) {
+void AdafruitGFX_drawRGBBitmap(int16_t x, int16_t y, const uint16_t bitmap[], int16_t w, int16_t h) {
+    int16_t i,j;
     AdafruitGFX_startwrite();
-    for(int16_t j=0; j<h; j++, y++) {
-        for(int16_t i=0; i<w; i++ ) {
+    for(j=0; j<h; j++, y++) {
+        for(i=0; i<w; i++ ) {
             AdafruitGFX_writePixel(x+i, y, pgm_read_word(&bitmap[j * w + i]));
         }
     }
@@ -724,9 +688,8 @@ void AdafruitGFX_drawRGBBitmap(int16_t x, int16_t y,
 // TEXT- AND CHARACTER-HANDLING FUNCTIONS ----------------------------------
 
 // Draw a character
-void AdafruitGFX_drawChar(int16_t x, int16_t y, unsigned char c,
-  uint16_t color, uint16_t bg, uint8_t size) {
-
+void AdafruitGFX_drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size) {
+    int8_t i,j;
     if(!gfxFont) { // 'Classic' built-in font
 
         if((x >= _width)            || // Clip right
@@ -738,9 +701,9 @@ void AdafruitGFX_drawChar(int16_t x, int16_t y, unsigned char c,
         if(!_cp437 && (c >= 176)) c++; // Handle 'classic' charset behavior
 
         AdafruitGFX_startwrite();
-        for(int8_t i=0; i<5; i++ ) { // Char bitmap = 5 columns
+        for(i=0; i<5; i++ ) { // Char bitmap = 5 columns
             uint8_t line = pgm_read_byte(&font[c * 5 + i]);
-            for(int8_t j=0; j<8; j++, line >>= 1) {
+            for(j=0; j<8; j++, line >>= 1) {
                 if(line & 1) {
                     if(size == 1)
                         AdafruitGFX_writePixel(x+i, y+j, color);
@@ -886,11 +849,11 @@ void AdafruitGFX_setCursor(int16_t x, int16_t y) {
     cursor_y = y;
 }
 
-int16_t AdafruitGFX_getCursorX(void) const {
+int16_t AdafruitGFX_getCursorX(void) {
     return cursor_x;
 }
 
-int16_t AdafruitGFX_getCursorY(void) const {
+int16_t AdafruitGFX_getCursorY(void) {
     return cursor_y;
 }
 
@@ -908,7 +871,7 @@ void AdafruitGFX_setTextWrap(boolean w) {
     wrap = w;
 }
 
-uint8_t AdafruitGFX_getRotation(void) const {
+uint8_t AdafruitGFX_getRotation(void) {
     return rotation;
 }
 
@@ -1039,11 +1002,11 @@ void AdafruitGFX_getTextBounds(char *str, int16_t x, int16_t y,
 }
 
 // Return the size of the display (per current rotation)
-int16_t AdafruitGFX_width(void) const {
+int16_t AdafruitGFX_width(void) {
     return _width;
 }
 
-int16_t AdafruitGFX_height(void) const {
+int16_t AdafruitGFX_height(void) {
     return _height;
 }
 
@@ -1051,3 +1014,45 @@ int16_t AdafruitGFX_height(void) const {
 //    // Do nothing, must be subclassed if supported by hardware
 //}
 
+
+
+
+void AdafruitGFX_init(int16_t w, int16_t h){
+    WIDTH = w;
+    HEIGHT = h;
+    _width    = WIDTH;
+    _height   = HEIGHT;
+    rotation  = 0;
+    cursor_y  = cursor_x    = 0;
+    textsize  = 1;
+    textcolor = textbgcolor = 0xFFFF;
+    wrap      = true;
+    _cp437    = false;
+    gfxFont   = NULL;
+
+    P_drawPixel         = AdafruitGFX_drawPixel;
+
+    P_startWrite        = AdafruitGFX_startwrite;
+    P_writePixel        = AdafruitGFX_writePixel;
+    P_writeFillRect     = AdafruitGFX_writeFillRect;
+    P_writeFastVLine    = AdafruitGFX_writeFastVLine;
+    P_writeFastHLine    = AdafruitGFX_writeFastHLine;
+    P_writeLine         = AdafruitGFX_writeLine;
+    P_endWrite          = AdafruitGFX_endwrite;
+
+    PsetRotation        = AdafruitGFX_setRotation;
+
+    P_drawFastVLine     = AdafruitGFX_drawFastVLine;
+    P_drawFastHLine     = AdafruitGFX_drawFastHLine;
+    P_fillRect          = AdafruitGFX_fillRect;
+    P_fillScreen        = AdafruitGFX_fillScreen;
+    P_drawLine          = AdafruitGFX_drawLine;
+    P_drawRect          = AdafruitGFX_drawRect;
+
+    P_write             = AdafruitGFX_write;
+
+    P_setCursor         = AdafruitGFX_setCursor;
+    P_setTextColor      = AdafruitGFX_setTextColor;
+    P_setTextSize       = AdafruitGFX_setTextSize;
+
+}

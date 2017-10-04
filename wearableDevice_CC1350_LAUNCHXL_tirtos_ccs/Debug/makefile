@@ -4,17 +4,15 @@
 
 SHELL = cmd.exe
 
-CG_TOOL_ROOT := D:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS
+CG_TOOL_ROOT := C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS
 
-GEN_OPTS += C:/Users/AppsTI/workspace_v7/tirtos_builds_CC1350_LAUNCHXL_release_ccs/Debug/configPkg/compiler.opt
-GEN_OPTS__FLAG := --cmd_file="C:/Users/AppsTI/workspace_v7/tirtos_builds_CC1350_LAUNCHXL_release_ccs/Debug/configPkg/compiler.opt"
-GEN_CMDS += C:/Users/AppsTI/workspace_v7/tirtos_builds_CC1350_LAUNCHXL_release_ccs/Debug/configPkg/linker.cmd
-GEN_CMDS__FLAG := -l"C:/Users/AppsTI/workspace_v7/tirtos_builds_CC1350_LAUNCHXL_release_ccs/Debug/configPkg/linker.cmd"
+GEN_OPTS += C:/Users/lnanhkhoa/workspace_v7/tirtos_builds_CC1350_LAUNCHXL_release_ccs/Debug/configPkg/compiler.opt
+GEN_OPTS__FLAG := --cmd_file="C:/Users/lnanhkhoa/workspace_v7/tirtos_builds_CC1350_LAUNCHXL_release_ccs/Debug/configPkg/compiler.opt"
+GEN_CMDS += C:/Users/lnanhkhoa/workspace_v7/tirtos_builds_CC1350_LAUNCHXL_release_ccs/Debug/configPkg/linker.cmd
+GEN_CMDS__FLAG := -l"C:/Users/lnanhkhoa/workspace_v7/tirtos_builds_CC1350_LAUNCHXL_release_ccs/Debug/configPkg/linker.cmd"
 
 ORDERED_OBJS += \
 "./CC1350_LAUNCHXL.obj" \
-"./TaskManager.obj" \
-"./TaskManager_test.obj" \
 "./bigtime.obj" \
 "./ccfg.obj" \
 "./main_tirtos.obj" \
@@ -27,14 +25,14 @@ ORDERED_OBJS += \
 "./devices/i2ctransfer/i2ctransfer.obj" \
 "../CC1350_LAUNCHXL_TIRTOS.cmd" \
 $(GEN_CMDS__FLAG) \
--l"C:/ti/simplelink_cc13x0_sdk_1_40_00_10/source/ti/display/lib/display.aem3" \
--l"C:/ti/simplelink_cc13x0_sdk_1_40_00_10/source/ti/mw/lcd/lib/lcd.aem3" \
--l"C:/ti/simplelink_cc13x0_sdk_1_40_00_10/source/ti/grlib/lib/grlib.aem3" \
--l"C:/ti/simplelink_cc13x0_sdk_1_40_00_10/source/ti/drivers/rf/lib/rf_multiMode_cc13x0.aem3" \
--l"C:/ti/simplelink_cc13x0_sdk_1_40_00_10/source/ti/drivers/lib/drivers_cc13x0.aem3" \
--l"C:/ti/simplelink_cc13x0_sdk_1_40_00_10/source/ti/drivers/pdm/lib/pdm_cc13x0.aem3" \
--l"C:/ti/simplelink_cc13x0_sdk_1_40_00_10/kernel/tirtos/packages/ti/dpl/lib/dpl_cc13x0.aem3" \
--l"C:/ti/simplelink_cc13x0_sdk_1_40_00_10/source/ti/devices/cc13x0/driverlib/bin/ccs/driverlib.lib" \
+-l"C:/ti/simplelink_cc13x0_sdk_1_50_00_08/source/ti/display/lib/display.aem3" \
+-l"C:/ti/simplelink_cc13x0_sdk_1_50_00_08/source/ti/mw/lcd/lib/lcd.aem3" \
+-l"C:/ti/simplelink_cc13x0_sdk_1_50_00_08/source/ti/grlib/lib/grlib.aem3" \
+-l"C:/ti/simplelink_cc13x0_sdk_1_50_00_08/source/ti/drivers/rf/lib/rf_multiMode_cc13x0.aem3" \
+-l"C:/ti/simplelink_cc13x0_sdk_1_50_00_08/source/ti/drivers/lib/drivers_cc13x0.aem3" \
+-l"C:/ti/simplelink_cc13x0_sdk_1_50_00_08/source/ti/drivers/pdm/lib/pdm_cc13x0.aem3" \
+-l"C:/ti/simplelink_cc13x0_sdk_1_50_00_08/kernel/tirtos/packages/ti/dpl/lib/dpl_cc13x0.aem3" \
+-l"C:/ti/simplelink_cc13x0_sdk_1_50_00_08/source/ti/devices/cc13x0/driverlib/bin/ccs/driverlib.lib" \
 -llibc.a \
 
 -include ../makefile.init
@@ -165,34 +163,34 @@ all: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@$(MAKE) --no-print-directory -Onone "wearableDevice_CC1350_LAUNCHXL_tirtos_ccs.out"
 
 dependents:
-	-cd C:/Users/AppsTI/workspace_v7/tirtos_builds_CC1350_LAUNCHXL_release_ccs/Debug && $(MAKE) all
+	-cd C:/Users/lnanhkhoa/workspace_v7/tirtos_builds_CC1350_LAUNCHXL_release_ccs/Debug && $(MAKE) all
 
 # Tool invocations
-wearableDevice_CC1350_LAUNCHXL_tirtos_ccs.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS) C:/Users/AppsTI/workspace_v7/tirtos_builds_CC1350_LAUNCHXL_release_ccs/Debug/tirtos_builds_CC1350_LAUNCHXL_release_ccs.lib
+wearableDevice_CC1350_LAUNCHXL_tirtos_ccs.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS) C:/Users/lnanhkhoa/workspace_v7/tirtos_builds_CC1350_LAUNCHXL_release_ccs/Debug/tirtos_builds_CC1350_LAUNCHXL_release_ccs.lib
 	@echo 'Building target: $@'
 	@echo 'Invoking: ARM Linker'
-	"D:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/bin/armcl" -mv7M3 --code_state=16 --float_support=vfplib -me --define=DeviceFamily_CC13X0 -g --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on -z -m"wearableDevice_CC1350_LAUNCHXL_tirtos_ccs.map" -i"D:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/lib" -i"D:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="wearableDevice_CC1350_LAUNCHXL_tirtos_ccs_linkInfo.xml" --rom_model -o "wearableDevice_CC1350_LAUNCHXL_tirtos_ccs.out" $(ORDERED_OBJS)
+	"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/bin/armcl" -mv7M3 --code_state=16 --float_support=vfplib -me --define=DeviceFamily_CC13X0 -g --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on -z -m"wearableDevice_CC1350_LAUNCHXL_tirtos_ccs.map" -i"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/lib" -i"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="wearableDevice_CC1350_LAUNCHXL_tirtos_ccs_linkInfo.xml" --rom_model -o "wearableDevice_CC1350_LAUNCHXL_tirtos_ccs.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 wearableDevice_CC1350_LAUNCHXL_tirtos_ccs.hex: $(EXE_OUTPUTS)
 	@echo 'Invoking: ARM Hex Utility'
-	"D:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/bin/armhex"  -o "wearableDevice_CC1350_LAUNCHXL_tirtos_ccs.hex" $(EXE_OUTPUTS__QUOTED)
+	"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/bin/armhex"  -o "wearableDevice_CC1350_LAUNCHXL_tirtos_ccs.hex" $(EXE_OUTPUTS__QUOTED)
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "CC1350_LAUNCHXL.obj" "TaskManager.obj" "TaskManager_test.obj" "bigtime.obj" "ccfg.obj" "main_tirtos.obj" "wearableDevice.obj" "OledDisplay\Adafruit_GFX.obj" "OledDisplay\Adafruit_SSD1306.obj" "OledDisplay\WDsDisplay.obj" "OledDisplay\minitransfer.obj" "devices\dvMMA9553.obj" "devices\i2ctransfer\i2ctransfer.obj" 
-	-$(RM) "CC1350_LAUNCHXL.d" "ccfg.d" 
-	-$(RM) "TaskManager.d" "TaskManager_test.d" "bigtime.d" "main_tirtos.d" "wearableDevice.d" "OledDisplay\Adafruit_GFX.d" "OledDisplay\Adafruit_SSD1306.d" "OledDisplay\WDsDisplay.d" "OledDisplay\minitransfer.d" "devices\dvMMA9553.d" "devices\i2ctransfer\i2ctransfer.d" 
+	-$(RM) "CC1350_LAUNCHXL.obj" "bigtime.obj" "ccfg.obj" "main_tirtos.obj" "wearableDevice.obj" "OledDisplay\Adafruit_GFX.obj" "OledDisplay\Adafruit_SSD1306.obj" "OledDisplay\WDsDisplay.obj" "OledDisplay\minitransfer.obj" "devices\dvMMA9553.obj" "devices\i2ctransfer\i2ctransfer.obj" 
+	-$(RM) "CC1350_LAUNCHXL.d" "bigtime.d" "ccfg.d" "main_tirtos.d" "wearableDevice.d" "OledDisplay\Adafruit_GFX.d" "OledDisplay\Adafruit_SSD1306.d" "OledDisplay\WDsDisplay.d" "devices\dvMMA9553.d" "devices\i2ctransfer\i2ctransfer.d" 
+	-$(RM) "OledDisplay\minitransfer.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 
 .PHONY: all clean dependents
 .SECONDARY:
-C:/Users/AppsTI/workspace_v7/tirtos_builds_CC1350_LAUNCHXL_release_ccs/Debug/tirtos_builds_CC1350_LAUNCHXL_release_ccs.lib:
+C:/Users/lnanhkhoa/workspace_v7/tirtos_builds_CC1350_LAUNCHXL_release_ccs/Debug/tirtos_builds_CC1350_LAUNCHXL_release_ccs.lib:
 
 -include ../makefile.targets
 

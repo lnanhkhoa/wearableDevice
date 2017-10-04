@@ -36,6 +36,8 @@ All text above, and the splash screen below must be included in any redistributi
 #include "Adafruit_SSD1306.h"
 
 
+extern int16_t WIDTH, HEIGHT;   // This is the 'raw' display w/h - never changes
+extern uint8_t rotation;
 
 // the memory buffer for the LCD
 
@@ -119,7 +121,7 @@ boolean hwSPI;
 // the most basic function, set a single pixel
 void AdafruitSSD1306_drawPixel(int16_t x, int16_t y, uint16_t color) {
   
-  if ((x < 0) || (x >= width()) || (y < 0) || (y >= height()))
+  if ((x < 0) || (x >= AdafruitSSD1306_width()) || (y < 0) || (y >= AdafruitSSD1306_height()))
     return;
 
   // check rotation, move pixel around if necessary
@@ -180,7 +182,8 @@ void AdafruitSSD1306_init(int8_t reset){
 }
 
 
-void AdafruitSSD1306_begin(uint8_t vccstate, uint8_t i2caddr, bool reset) {
+void AdafruitSSD1306_begin(int8_t vccstate, int8_t i2caddr, bool reset) {
+
   _vccstate = vccstate;
   _i2caddr = i2caddr;
 
@@ -246,7 +249,7 @@ void AdafruitSSD1306_begin(uint8_t vccstate, uint8_t i2caddr, bool reset) {
   ssd1306_command(0x0);                                   // no offset
   ssd1306_command(SSD1306_SETSTARTLINE | 0x0);            // line #0
   ssd1306_command(SSD1306_CHARGEPUMP);                    // 0x8D
-  if (vccstate == SSD1306_EXTERNALVCC)
+  if (_vccstate == SSD1306_EXTERNALVCC)
     { ssd1306_command(0x10); }
   else
     { ssd1306_command(0x14); }
@@ -265,7 +268,7 @@ void AdafruitSSD1306_begin(uint8_t vccstate, uint8_t i2caddr, bool reset) {
   ssd1306_command(SSD1306_SETCOMPINS);                    // 0xDA
   ssd1306_command(0x12);
   ssd1306_command(SSD1306_SETCONTRAST);                   // 0x81
-  if (vccstate == SSD1306_EXTERNALVCC)
+  if (_vccstate == SSD1306_EXTERNALVCC)
     { ssd1306_command(0x9F); }
   else
     { ssd1306_command(0xCF); }
@@ -282,7 +285,7 @@ void AdafruitSSD1306_begin(uint8_t vccstate, uint8_t i2caddr, bool reset) {
   #endif
 
   ssd1306_command(SSD1306_SETPRECHARGE);                  // 0xd9
-  if (vccstate == SSD1306_EXTERNALVCC)
+  if (_vccstate == SSD1306_EXTERNALVCC)
     { ssd1306_command(0x22); }
   else
     { ssd1306_command(0xF1); }
@@ -318,7 +321,7 @@ void ssd1306_command(uint8_t c) {
   //    digitalWrite(dc, LOW);
   //    digitalWrite(cs, LOW);
   #endif
-    AdafruitGFX_fastSPIwrite(c);
+    AdafruitSSD1306_fastSPIwrite(c);
   #ifdef HAVE_PORTREG
       *csport |= cspinmask;
   #else
@@ -431,6 +434,7 @@ void AdafruitSSD1306_onoff(bool mode){
 
 
 void AdafruitSSD1306_display(void) {
+  uint32_t i;
   ssd1306_command(SSD1306_COLUMNADDR);
   ssd1306_command(0);   // Column start address (0 = reset)
   ssd1306_command(SSD1306_LCDWIDTH-1); // Column end address (127 = reset)
@@ -447,31 +451,30 @@ void AdafruitSSD1306_display(void) {
     ssd1306_command(1); // Page end address
   #endif
 
-  if (sid != -1)
-  {
-    // SPI
-  #ifdef HAVE_PORTREG
-      *csport |= cspinmask;
-      *dcport |= dcpinmask;
-      *csport &= ~cspinmask;
-  #else
-   // digitalWrite(cs, HIGH);
-   // digitalWrite(dc, HIGH);
-   // digitalWrite(cs, LOW);
-    ;
-  #endif
-
-    for (uint16_t i=0; i<(SSD1306_LCDWIDTH*SSD1306_LCDHEIGHT/8); i++) {
-      AdafruitGFX_fastSPIwrite(buffer[i]);
-    }
-  #ifdef HAVE_PORTREG
-      *csport |= cspinmask;
-  #else
-  //    digitalWrite(cs, HIGH);
-  #endif
-  }
-  else
-  {
+  // if (sid != -1)
+  // {
+  //   // SPI
+  // #ifdef HAVE_PORTREG
+  //     *csport |= cspinmask;
+  //     *dcport |= dcpinmask;
+  //     *csport &= ~cspinmask;
+  // #else
+  //  // digitalWrite(cs, HIGH);
+  //  // digitalWrite(dc, HIGH);
+  //  // digitalWrite(cs, LOW);
+  //   ;
+  // #endif
+  //   for (i=0; i<(SSD1306_LCDWIDTH*SSD1306_LCDHEIGHT/8); i++) {
+  //     AdafruitSSD1306_fastSPIwrite(buffer[i]);
+  //   }
+  // #ifdef HAVE_PORTREG
+  //     *csport |= cspinmask;
+  // #else
+  // //    digitalWrite(cs, HIGH);
+  // #endif
+  // }
+  // else
+  // {
     // save I2C bitrate
   #ifdef TWBR
       uint8_t twbrbackup = TWBR;
@@ -479,7 +482,7 @@ void AdafruitSSD1306_display(void) {
   #endif
 
     // I2C
-     for (uint16_t i=0; i<(SSD1306_LCDWIDTH*SSD1306_LCDHEIGHT/8); i++) {
+     for (i=0; i<(SSD1306_LCDWIDTH*SSD1306_LCDHEIGHT/8); i++) {
       // send a bunch of data in one xmission
 
       I2c_WriteRegister(_i2caddr, 0x40, &buffer[i], 16);
@@ -489,11 +492,12 @@ void AdafruitSSD1306_display(void) {
   #ifdef TWBR
       TWBR = twbrbackup;
   #endif
-  }
+  // }
 }
 
 
-void AdafruitSSD1306_display(uint8_t startPage, uint8_t endPage) {
+void AdafruitSSD1306_displayPage(uint8_t startPage, uint8_t endPage) {
+  uint32_t i;
   ssd1306_command(SSD1306_COLUMNADDR);
   ssd1306_command(0);   // Column start address (0 = reset)
   ssd1306_command(SSD1306_LCDWIDTH-1); // Column end address (127 = reset)
@@ -513,46 +517,44 @@ void AdafruitSSD1306_display(uint8_t startPage, uint8_t endPage) {
    ssd1306_command(1); // Page end address
  #endif
 
-  if (sid != -1)
-  {
-    // SPI
-  #ifdef HAVE_PORTREG
-      *csport |= cspinmask;
-      *dcport |= dcpinmask;
-      *csport &= ~cspinmask;
-  #else
-   // digitalWrite(cs, HIGH);
-   // digitalWrite(dc, HIGH);
-   // digitalWrite(cs, LOW);
-      ;
-  #endif
-
-    for (uint16_t i=startPage*127; i<(endPage+1)*127; i++) {
-      AdafruitGFX_fastSPIwrite(buffer[i]);
-    }
-  #ifdef HAVE_PORTREG
-      *csport |= cspinmask;
-  #else
-  //    digitalWrite(cs, HIGH);
-  #endif
-  }
-  else
-  {
+  // if (sid != -1)
+  // {
+  //   // SPI
+  // #ifdef HAVE_PORTREG
+  //     *csport |= cspinmask;
+  //     *dcport |= dcpinmask;
+  //     *csport &= ~cspinmask;
+  // #else
+  //  // digitalWrite(cs, HIGH);
+  //  // digitalWrite(dc, HIGH);
+  //  // digitalWrite(cs, LOW);
+  //     ;
+  // #endif
+  //   // for (i=startPage*127; i<(endPage+1)*127; i++) {
+  //   //   AdafruitSSD1306_fastSPIwrite(buffer[i]);
+  //   // }
+  // #ifdef HAVE_PORTREG
+  //     *csport |= cspinmask;
+  // #else
+  // //    digitalWrite(cs, HIGH);
+  // #endif
+  // }
+  // else
+  // {
     // save I2C bitrate
   #ifdef TWBR
       uint8_t twbrbackup = TWBR;
       TWBR = 12; // upgrade to 400KHz!
   #endif
-
     // I2C
-    for (uint16_t i=startPage*127; i<(endPage+1)*127; i++) {
+    for (i=startPage*127; i<(endPage+1)*127; i++) {
       I2c_WriteRegister(_i2caddr, 0x40, &buffer[i], 16);
       i+=15;
     }
   #ifdef TWBR
       TWBR = twbrbackup;
   #endif
-  }
+  // }
 }
 
 
@@ -596,7 +598,7 @@ void AdafruitSSD1306_drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t col
       x = WIDTH - x - 1;
       break;
     case 2:
-      // 180 degree rotation, invert x and y - then shift y around for height.
+      // 180 degree rotation, invert x and y - then shift y around for AdafruitSSD1306_height.
       x = WIDTH - x - 1;
       y = HEIGHT - y - 1;
       x -= (w-1);
@@ -632,7 +634,7 @@ void AdafruitSSD1306_drawFastHLineInternal(int16_t x, int16_t y, int16_t w, uint
     w = (WIDTH - x);
   }
 
-  // if our width is now negative, punt
+  // if our AdafruitSSD1306_width is now negative, punt
   if(w <= 0) { return; }
 
   // set up the pointer for  movement through the buffer
@@ -666,7 +668,7 @@ void AdafruitSSD1306_drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t col
       x -= (h-1);
       break;
     case 2:
-      // 180 degree rotation, invert x and y - then shift y around for height.
+      // 180 degree rotation, invert x and y - then shift y around for AdafruitSSD1306_height.
       x = WIDTH - x - 1;
       y = HEIGHT - y - 1;
       y -= (h-1);
@@ -700,12 +702,12 @@ void AdafruitSSD1306_drawFastVLineInternal(int16_t x, int16_t __y, int16_t __h, 
 
   }
 
-  // make sure we don't go past the height of the display
+  // make sure we don't go past the AdafruitSSD1306_height of the display
   if( (__y + __h) > HEIGHT) {
     __h = (HEIGHT - __y);
   }
 
-  // if our height is now negative, punt
+  // if our AdafruitSSD1306_height is now negative, punt
   if(__h <= 0) {
     return;
   }
@@ -810,16 +812,34 @@ uint8_t *AdafruitSSD1306_getbuffer(void){
 
 
 
-void AdafruitSSD1306_drawBitmap(int16_t x, int16_t y, const unsigned char bitmap[], int16_t w, int16_t h, uint16_t color){
-  P_drawBitmap(x, y, bitmap, w, h, color);
+void AdafruitSSD1306_drawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg){
+  AdafruitGFX_drawBitmap(x, y, bitmap, w, h, color, bg);
 }
 
-void AdafruitGFX_setCursor(int16_t x, int16_t y){
+void AdafruitSSD1306_setCursor(int16_t x, int16_t y){
   P_setCursor(x, y);
 }
-void AdafruitGFX_setTextColor(uint16_t c){
+
+void AdafruitSSD1306_setTextColor(uint16_t c){
   P_setTextColor(c);
 }
-void AdafruitGFX_setTextSize(uint8_t s){
+
+void AdafruitSSD1306_setTextSize(uint8_t s){
   P_setTextSize(s);
+}
+
+void AdafruitSSD1306_fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color){
+  P_fillRect(x, y, w, h, color);
+} 
+
+void AdafruitSSD1306_print(uint8_t *str){
+  AdafruitGFX_print(str);
+}
+
+int16_t AdafruitSSD1306_height(void){
+  return AdafruitGFX_height();
+}
+
+int16_t AdafruitSSD1306_width(void){
+  return AdafruitGFX_width();
 }

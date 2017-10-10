@@ -1,8 +1,8 @@
 #
 _XDCBUILDCOUNT = 
 ifneq (,$(findstring path,$(_USEXDCENV_)))
-override XDCPATH = C:/ti/simplelink_cc13x0_sdk_1_50_00_08/source;C:/ti/simplelink_cc13x0_sdk_1_50_00_08/kernel/tirtos/packages;D:/ti/ccsv7/ccs_base
-override XDCROOT = D:/ti/xdctools_3_50_02_20_core
+override XDCPATH = C:/ti/simplelink_cc13x0_sdk_1_40_00_10/source;C:/ti/simplelink_cc13x0_sdk_1_40_00_10/kernel/tirtos/packages;C:/ti/ccs730/ccsv7/ccs_base
+override XDCROOT = C:/ti/ccs730/xdctools_3_50_03_33_core
 override XDCBUILDCFG = ./config.bld
 endif
 ifneq (,$(findstring args,$(_USEXDCENV_)))
@@ -11,6 +11,6 @@ override XDCTARGETS =
 endif
 #
 ifeq (0,1)
-PKGPATH = C:/ti/simplelink_cc13x0_sdk_1_50_00_08/source;C:/ti/simplelink_cc13x0_sdk_1_50_00_08/kernel/tirtos/packages;D:/ti/ccsv7/ccs_base;D:/ti/xdctools_3_50_02_20_core/packages;..
+PKGPATH = C:/ti/simplelink_cc13x0_sdk_1_40_00_10/source;C:/ti/simplelink_cc13x0_sdk_1_40_00_10/kernel/tirtos/packages;C:/ti/ccs730/ccsv7/ccs_base;C:/ti/ccs730/xdctools_3_50_03_33_core/packages;..
 HOSTOS = Windows
 endif

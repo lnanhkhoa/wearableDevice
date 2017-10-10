@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>simpleperipheral_cc1350lp_app_FlashROM</name>
+	<name>simple_peripheral_cc1350lp_app_FlashROM</name>
 	<comment></comment>
 	<projects>
 		<project>simple_peripheral_cc1350lp_stack_FlashROM</project>
@@ -255,11 +255,11 @@
 		</variable>
 		<variable>
 			<name>PROJECT_BUILD_BASE</name>
-			<value>$%7BCOM_TI_SIMPLELINK_CC13X0_SDK_INSTALL_DIR%7D/examples/rtos/CC1350_LAUNCHXL/blestack/simple_peripheral</value>
+			<value>$%7BTI_PRODUCTS_DIR__TIREX%7D/simplelink_cc13x0_sdk_1_50_00_08/examples/rtos/CC1350_LAUNCHXL/blestack/simple_peripheral</value>
 		</variable>
 		<variable>
 			<name>TI_BLE_SDK_BASE</name>
-			<value>$%7BCOM_TI_SIMPLELINK_CC13X0_SDK_INSTALL_DIR%7D</value>
+			<value>$%7BTI_PRODUCTS_DIR__TIREX%7D/simplelink_cc13x0_sdk_1_50_00_08</value>
 		</variable>
 		<variable>
 			<name>TI_RTOS_DRIVERS_BASE</name>

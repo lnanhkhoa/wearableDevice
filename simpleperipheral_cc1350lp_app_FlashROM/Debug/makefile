@@ -4,45 +4,42 @@
 
 SHELL = cmd.exe
 
-CG_TOOL_ROOT := D:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS
+CG_TOOL_ROOT := C:/ti/ccs730/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS
 
 GEN_OPTS__FLAG := --cmd_file="configPkg/compiler.opt"
 GEN_CMDS__FLAG := -l"configPkg/linker.cmd"
 
 ORDERED_OBJS += \
-"./Application/OledDisplay/Adafruit_GFX.obj" \
-"./Application/OledDisplay/Adafruit_SSD1306.obj" \
-"./Application/OledDisplay/WDsDisplay.obj" \
-"./Application/OledDisplay/minitransfer.obj" \
-"./Application/bigtime.obj" \
-"./Application/simple_peripheral.obj" \
+"./Application/heart_rate.obj" \
 "./Application/util.obj" \
-"./Application/wearableDevice.obj" \
-"./Application/devices/dvMMA9553.obj" \
-"./Application/devices/i2ctransfer/i2ctransfer.obj" \
 "./Drivers/ECC/ECCROMCC26XX.obj" \
 "./Drivers/TRNG/TRNGCC26XX.obj" \
 "./ICall/icall.obj" \
 "./ICall/icall_cc2650.obj" \
 "./ICallBLE/ble_user_config.obj" \
 "./ICallBLE/icall_api.obj" \
+"./PROFILES/Asimple_gatt_profile.obj" \
+"./PROFILES/accelerometer.obj" \
+"./PROFILES/battservice.obj" \
 "./PROFILES/devinfoservice.obj" \
 "./PROFILES/gatt_uuid.obj" \
 "./PROFILES/gattservapp_util.obj" \
 "./PROFILES/heartrateservice.obj" \
+"./PROFILES/hiddev.obj" \
 "./PROFILES/peripheral.obj" \
-"./PROFILES/simple_gatt_profile.obj" \
+"./PROFILES/runningservice.obj" \
+"./PROFILES/scanparamservice.obj" \
 "./Startup/board.obj" \
 "./Startup/ccfg_app_ble.obj" \
 "./Startup/main.obj" \
 $(GEN_CMDS__FLAG) \
 -llibc.a \
--l"C:/ti/simplelink_cc13x0_sdk_1_50_00_08/source/ti/drivers/lib/drivers_cc13x0.aem3" \
--l"C:/ti/simplelink_cc13x0_sdk_1_50_00_08/kernel/tirtos/packages/ti/dpl/lib/dpl_cc13x0.aem3" \
--l"C:/ti/simplelink_cc13x0_sdk_1_50_00_08/source/ti/devices/cc13x0/driverlib/bin/ccs/driverlib.lib" \
--l"C:/ti/simplelink_cc13x0_sdk_1_50_00_08/source/ti/drivers/rf/lib/rf_multiMode_cc13x0.arm3" \
+-l"C:/ti/simplelink_cc13x0_sdk_1_40_00_10/source/ti/drivers/lib/drivers_cc13x0.aem3" \
+-l"C:/ti/simplelink_cc13x0_sdk_1_40_00_10/kernel/tirtos/packages/ti/dpl/lib/dpl_cc13x0.aem3" \
+-l"C:/ti/simplelink_cc13x0_sdk_1_40_00_10/source/ti/devices/cc13x0/driverlib/bin/ccs/driverlib.lib" \
+-l"C:/ti/simplelink_cc13x0_sdk_1_40_00_10/source/ti/drivers/rf/lib/rf_multiMode_cc13x0.arm3" \
 -l"C:/ti/simplelink_cc13x0_sdk_1_50_00_08/source/ti/blestack/rom/common_rom_releases/03282014/common_rom.symbols" \
--l"C:/Users/AppsTI/workspace_blestack/simple_peripheral_cc1350lp_stack_FlashROM/TOOLS/ccs_linker_defines.cmd" \
+-l"C:/Users/User/workspace_v7/simple_peripheral_cc1350lp_stack_FlashROM/TOOLS/ccs_linker_defines.cmd" \
 -l"C:/ti/simplelink_cc13x0_sdk_1_50_00_08/source/ti/blestack/common/cc26xx/ccs/cc26xx_app.cmd" \
 -llibc.a \
 
@@ -53,10 +50,7 @@ RMDIR := RMDIR /S/Q
 
 # All of the sources participating in the build are defined here
 -include sources.mk
--include Application/OledDisplay/subdir_vars.mk
 -include Application/subdir_vars.mk
--include Application/devices/subdir_vars.mk
--include Application/devices/i2ctransfer/subdir_vars.mk
 -include Drivers/ECC/subdir_vars.mk
 -include Drivers/TRNG/subdir_vars.mk
 -include ICall/subdir_vars.mk
@@ -64,10 +58,7 @@ RMDIR := RMDIR /S/Q
 -include PROFILES/subdir_vars.mk
 -include Startup/subdir_vars.mk
 -include TOOLS/subdir_vars.mk
--include Application/OledDisplay/subdir_rules.mk
 -include Application/subdir_rules.mk
--include Application/devices/subdir_rules.mk
--include Application/devices/i2ctransfer/subdir_rules.mk
 -include Drivers/ECC/subdir_rules.mk
 -include Drivers/TRNG/subdir_rules.mk
 -include ICall/subdir_rules.mk
@@ -171,37 +162,37 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXE_OUTPUTS += \
-simpleperipheral_cc1350lp_app_FlashROM.out \
+simple_peripheral_cc1350lp_app_FlashROM.out \
 
 EXE_OUTPUTS__QUOTED += \
-"simpleperipheral_cc1350lp_app_FlashROM.out" \
+"simple_peripheral_cc1350lp_app_FlashROM.out" \
 
 BIN_OUTPUTS += \
-simpleperipheral_cc1350lp_app_FlashROM.hex \
+simple_peripheral_cc1350lp_app_FlashROM.hex \
 
 BIN_OUTPUTS__QUOTED += \
-"simpleperipheral_cc1350lp_app_FlashROM.hex" \
+"simple_peripheral_cc1350lp_app_FlashROM.hex" \
 
 
 # All Target
 all: $(OBJS) $(GEN_CMDS)
-	@$(MAKE) --no-print-directory -Onone "simpleperipheral_cc1350lp_app_FlashROM.out"
+	@$(MAKE) --no-print-directory -Onone "simple_peripheral_cc1350lp_app_FlashROM.out"
 
 dependents:
-	-cd C:/Users/AppsTI/workspace_blestack/simple_peripheral_cc1350lp_stack_FlashROM/Debug && $(MAKE) all
+	-cd C:/Users/User/workspace_v7/simple_peripheral_cc1350lp_stack_FlashROM/Debug && $(MAKE) all
 
 # Tool invocations
-simpleperipheral_cc1350lp_app_FlashROM.out: $(OBJS) $(GEN_CMDS) C:/Users/AppsTI/workspace_blestack/simple_peripheral_cc1350lp_stack_FlashROM/Debug/simple_peripheral_cc1350lp_stack_FlashROM.out
+simple_peripheral_cc1350lp_app_FlashROM.out: $(OBJS) $(GEN_CMDS) C:/Users/User/workspace_v7/simple_peripheral_cc1350lp_stack_FlashROM/Debug/simple_peripheral_cc1350lp_stack_FlashROM.out
 	@echo 'Building target: $@'
 	@echo 'Invoking: ARM Linker'
-	"D:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/bin/armcl" --cmd_file="C:/ti/simplelink_cc13x0_sdk_1_50_00_08/source/ti/blestack/config/build_components.opt" --cmd_file="C:/ti/simplelink_cc13x0_sdk_1_50_00_08/examples/rtos/CC1350_LAUNCHXL/blestack/simple_peripheral/tirtos/iar/stack/build_config.opt" --cmd_file="C:/Users/AppsTI/workspace_blestack/simple_peripheral_cc1350lp_stack_FlashROM/TOOLS/ccs_compiler_defines.bcfg"  -mv7M3 --code_state=16 -me -O4 --opt_for_speed=0 --define=BOARD_DISPLAY_EXCLUDE_UART --define=CC1350_LAUNCHXL --define=CC13XX --define=DeviceFamily_CC13X0 --define=Display_DISABLE_ALL --define=HEAPMGR_SIZE=0 --define=ICALL_MAX_NUM_ENTITIES=6 --define=ICALL_MAX_NUM_TASKS=3 --define=POWER_SAVING --define=USE_ICALL --define=USE_CORE_SDK --define=xBOARD_DISPLAY_EXCLUDE_LCD --define=xdc_runtime_Assert_DISABLE_ALL --define=xdc_runtime_Log_DISABLE_ALL -g --c99 --gcc --diag_warning=225 --diag_wrap=off --display_error_number --gen_func_subsections=on --abi=eabi -z -m"simpleperipheral_cc1350lp_app_FlashROM.map" --heap_size=0 --stack_size=256 -i"D:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/lib" -i"D:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/include" --reread_libs --diag_suppress=16002-D --diag_suppress=10247-D --diag_suppress=10325-D --diag_suppress=16032-D --diag_wrap=off --display_error_number --warn_sections --xml_link_info="simpleperipheral_cc1350lp_app_FlashROM_linkInfo.xml" --rom_model -o "simpleperipheral_cc1350lp_app_FlashROM.out" $(ORDERED_OBJS)
+	"C:/ti/ccs730/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/bin/armcl" --cmd_file="C:/ti/simplelink_cc13x0_sdk_1_50_00_08/source/ti/blestack/config/build_components.opt" --cmd_file="C:/ti/simplelink_cc13x0_sdk_1_50_00_08/examples/rtos/CC1350_LAUNCHXL/blestack/simple_peripheral/tirtos/iar/stack/build_config.opt" --cmd_file="C:/Users/User/workspace_v7/simple_peripheral_cc1350lp_stack_FlashROM/TOOLS/ccs_compiler_defines.bcfg"  -mv7M3 --code_state=16 -me -O4 --opt_for_speed=0 --define=BOARD_DISPLAY_EXCLUDE_UART --define=CC1350_LAUNCHXL --define=CC13XX --define=DeviceFamily_CC13X0 --define=Display_DISABLE_ALL --define=HEAPMGR_SIZE=0 --define=ICALL_MAX_NUM_ENTITIES=6 --define=ICALL_MAX_NUM_TASKS=3 --define=POWER_SAVING --define=USE_ICALL --define=USE_CORE_SDK --define=xBOARD_DISPLAY_EXCLUDE_LCD --define=xdc_runtime_Assert_DISABLE_ALL --define=xdc_runtime_Log_DISABLE_ALL -g --c99 --gcc --diag_warning=225 --diag_wrap=off --display_error_number --gen_func_subsections=on --abi=eabi -z -m"simple_peripheral_cc1350lp_app_FlashROM.map" --heap_size=0 --stack_size=256 -i"C:/ti/ccs730/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/lib" -i"C:/ti/ccs730/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/include" --reread_libs --diag_suppress=16002-D --diag_suppress=10247-D --diag_suppress=10325-D --diag_suppress=16032-D --diag_wrap=off --display_error_number --warn_sections --xml_link_info="simple_peripheral_cc1350lp_app_FlashROM_linkInfo.xml" --rom_model -o "simple_peripheral_cc1350lp_app_FlashROM.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 	@$(MAKE) --no-print-directory post-build
 
-simpleperipheral_cc1350lp_app_FlashROM.hex: $(EXE_OUTPUTS)
+simple_peripheral_cc1350lp_app_FlashROM.hex: $(EXE_OUTPUTS)
 	@echo 'Invoking: ARM Hex Utility'
-	"D:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/bin/armhex" --memwidth=8 --romwidth=8 --intel -o "simpleperipheral_cc1350lp_app_FlashROM.hex" $(EXE_OUTPUTS__QUOTED)
+	"C:/ti/ccs730/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/bin/armhex" --memwidth=8 --romwidth=8 --intel -o "simple_peripheral_cc1350lp_app_FlashROM.hex" $(EXE_OUTPUTS__QUOTED)
 	@echo 'Finished building: $@'
 	@echo ' '
 	@$(MAKE) --no-print-directory post-build
@@ -210,19 +201,18 @@ simpleperipheral_cc1350lp_app_FlashROM.hex: $(EXE_OUTPUTS)
 clean:
 	-$(RM) $(GEN_CMDS__QUOTED)$(GEN_MISC_FILES__QUOTED)$(BIN_OUTPUTS__QUOTED)$(GEN_FILES__QUOTED)$(EXE_OUTPUTS__QUOTED)$(GEN_OPTS__QUOTED)
 	-$(RMDIR) $(GEN_MISC_DIRS__QUOTED)
-	-$(RM) "Application\OledDisplay\Adafruit_GFX.obj" "Application\OledDisplay\Adafruit_SSD1306.obj" "Application\OledDisplay\WDsDisplay.obj" "Application\OledDisplay\minitransfer.obj" "Application\bigtime.obj" "Application\simple_peripheral.obj" "Application\util.obj" "Application\wearableDevice.obj" "Application\devices\dvMMA9553.obj" "Application\devices\i2ctransfer\i2ctransfer.obj" "Drivers\ECC\ECCROMCC26XX.obj" "Drivers\TRNG\TRNGCC26XX.obj" "ICall\icall.obj" "ICall\icall_cc2650.obj" "ICallBLE\ble_user_config.obj" "ICallBLE\icall_api.obj" "PROFILES\devinfoservice.obj" "PROFILES\gatt_uuid.obj" "PROFILES\gattservapp_util.obj" "PROFILES\heartrateservice.obj" "PROFILES\peripheral.obj" "PROFILES\simple_gatt_profile.obj" "Startup\board.obj" "Startup\ccfg_app_ble.obj" "Startup\main.obj" 
-	-$(RM) "Application\OledDisplay\Adafruit_GFX.d" "Application\OledDisplay\Adafruit_SSD1306.d" "Application\OledDisplay\WDsDisplay.d" "Application\bigtime.d" "Application\simple_peripheral.d" "Application\util.d" "Application\wearableDevice.d" "Application\devices\dvMMA9553.d" "Application\devices\i2ctransfer\i2ctransfer.d" "Drivers\ECC\ECCROMCC26XX.d" "Drivers\TRNG\TRNGCC26XX.d" "ICall\icall.d" "ICall\icall_cc2650.d" "ICallBLE\ble_user_config.d" "ICallBLE\icall_api.d" "PROFILES\devinfoservice.d" "PROFILES\gatt_uuid.d" "PROFILES\gattservapp_util.d" "PROFILES\heartrateservice.d" "PROFILES\peripheral.d" "PROFILES\simple_gatt_profile.d" "Startup\board.d" "Startup\ccfg_app_ble.d" "Startup\main.d" 
-	-$(RM) "Application\OledDisplay\minitransfer.d" 
+	-$(RM) "Application\heart_rate.obj" "Application\util.obj" "Drivers\ECC\ECCROMCC26XX.obj" "Drivers\TRNG\TRNGCC26XX.obj" "ICall\icall.obj" "ICall\icall_cc2650.obj" "ICallBLE\ble_user_config.obj" "ICallBLE\icall_api.obj" "PROFILES\Asimple_gatt_profile.obj" "PROFILES\accelerometer.obj" "PROFILES\battservice.obj" "PROFILES\devinfoservice.obj" "PROFILES\gatt_uuid.obj" "PROFILES\gattservapp_util.obj" "PROFILES\heartrateservice.obj" "PROFILES\hiddev.obj" "PROFILES\peripheral.obj" "PROFILES\runningservice.obj" "PROFILES\scanparamservice.obj" "Startup\board.obj" "Startup\ccfg_app_ble.obj" "Startup\main.obj" 
+	-$(RM) "Application\heart_rate.d" "Application\util.d" "Drivers\ECC\ECCROMCC26XX.d" "Drivers\TRNG\TRNGCC26XX.d" "ICall\icall.d" "ICall\icall_cc2650.d" "ICallBLE\ble_user_config.d" "ICallBLE\icall_api.d" "PROFILES\Asimple_gatt_profile.d" "PROFILES\accelerometer.d" "PROFILES\battservice.d" "PROFILES\devinfoservice.d" "PROFILES\gatt_uuid.d" "PROFILES\gattservapp_util.d" "PROFILES\heartrateservice.d" "PROFILES\hiddev.d" "PROFILES\peripheral.d" "PROFILES\runningservice.d" "PROFILES\scanparamservice.d" "Startup\board.d" "Startup\ccfg_app_ble.d" "Startup\main.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 
 post-build:
-	-D:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/bin/armhex -order MS --memwidth=8 --romwidth=8 --intel -o      simpleperipheral_cc1350lp_app_FlashROM.hex simpleperipheral_cc1350lp_app_FlashROM.out
+	-C:/ti/ccs730/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/bin/armhex -order MS --memwidth=8 --romwidth=8 --intel -o      simple_peripheral_cc1350lp_app_FlashROM.hex simple_peripheral_cc1350lp_app_FlashROM.out
 	-@echo ' '
 
 .PHONY: all clean dependents
 .SECONDARY:
-C:/Users/AppsTI/workspace_blestack/simple_peripheral_cc1350lp_stack_FlashROM/Debug/simple_peripheral_cc1350lp_stack_FlashROM.out:
+C:/Users/User/workspace_v7/simple_peripheral_cc1350lp_stack_FlashROM/Debug/simple_peripheral_cc1350lp_stack_FlashROM.out:
 
 -include ../makefile.targets
 

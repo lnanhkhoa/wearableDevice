@@ -25,7 +25,7 @@
             platform="ti.platforms.simCM3"
             isa="v7M"
             suffix="em3"
-            rootDir="D:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS"
+            rootDir="C:/ti/ccs730/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS"
             os="undefined"
             rts="ti.targets.arm.rtsarm">
             <model endian="little"

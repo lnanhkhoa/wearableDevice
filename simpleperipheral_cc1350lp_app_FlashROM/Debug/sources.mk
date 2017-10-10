@@ -123,10 +123,7 @@ GEN_OPTS__QUOTED :=
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
-Application/OledDisplay \
 Application \
-Application/devices \
-Application/devices/i2ctransfer \
 Drivers/ECC \
 Drivers/TRNG \
 ICall \

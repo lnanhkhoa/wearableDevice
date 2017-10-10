@@ -5,11 +5,11 @@
  @brief main entry of the BLE stack sample application.
 
  Group: WCS, BTS
- Target Device: CC1350
+ Target Device: CC2650, CC2640, CC1350
 
  ******************************************************************************
  
- Copyright (c) 2013-2017, Texas Instruments Incorporated
+ Copyright (c) 2013-2016, Texas Instruments Incorporated
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -40,27 +40,26 @@
  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
  ******************************************************************************
- Release Name: ti-ble-2.3.2-stack-sdk_1_50_xx
- Release Date: 2017-09-27 14:52:16
+ Release Name: ble_sdk_2_02_01_18
+ Release Date: 2016-10-26 15:20:04
  *****************************************************************************/
-  
+
 /*******************************************************************************
  * INCLUDES
  */
 
 #include <xdc/runtime/Error.h>
-
 #include <ti/drivers/Power.h>
 #include <ti/drivers/power/PowerCC26XX.h>
 #include <ti/sysbios/BIOS.h>
 
 #include "icall.h"
 #include "hal_assert.h"
+#include "board.h"
+
 #include "bcomdef.h"
 #include "peripheral.h"
-#include "simple_peripheral.h"
-//#include "Application/heartrate.h"
-#include "Application/wearableDevice.h"
+#include "../Application/heart_rate.h"
 
 /* Header files required to enable instruction fetch cache */
 #include <inc/hw_memmap.h>
@@ -80,11 +79,6 @@ bleUserCfg_t user0Cfg = BLE_USER_CFG;
 #else // !USE_CORE_SDK
   #include <ti/mw/display/Display.h>
 #endif // USE_CORE_SDK
-
-#ifdef USE_FPGA
-#include <inc/hw_prcm.h>
-#endif // USE_FPGA
-
 /*******************************************************************************
  * MACROS
  */
@@ -92,15 +86,6 @@ bleUserCfg_t user0Cfg = BLE_USER_CFG;
 /*******************************************************************************
  * CONSTANTS
  */
-
-#if defined( USE_FPGA )
-  #define RFC_MODE_BLE                 PRCM_RFCMODESEL_CURR_MODE1
-  #define RFC_MODE_ANT                 PRCM_RFCMODESEL_CURR_MODE4
-  #define RFC_MODE_EVERYTHING_BUT_ANT  PRCM_RFCMODESEL_CURR_MODE5
-  #define RFC_MODE_EVERYTHING          PRCM_RFCMODESEL_CURR_MODE6
-  //
-  #define SET_RFC_BLE_MODE(mode) HWREG( PRCM_BASE + PRCM_O_RFCMODESEL ) = (mode)
-#endif // USE_FPGA
 
 /*******************************************************************************
  * TYPEDEFS
@@ -114,6 +99,7 @@ bleUserCfg_t user0Cfg = BLE_USER_CFG;
  * GLOBAL VARIABLES
  */
 
+
 #ifdef CC1350_LAUNCHXL
 #ifdef POWER_SAVING
 // Power Notify Object for wake-up callbacks
@@ -123,7 +109,7 @@ static uint8_t rFSwitchNotifyCb(uint8_t eventType, uint32_t *eventArg,
 #endif //POWER_SAVING
 
 PIN_State  radCtrlState;
-PIN_Config radCtrlCfg[] = 
+PIN_Config radCtrlCfg[] =
 {
   Board_DIO1_RFSW   | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW  | PIN_PUSHPULL | PIN_DRVSTR_MAX, /* RF SW Switch defaults to 2.4GHz path*/
   Board_DIO30_SWPWR | PIN_GPIO_OUTPUT_EN | PIN_GPIO_HIGH | PIN_PUSHPULL | PIN_DRVSTR_MAX, /* Power to the RF Switch */
@@ -131,7 +117,6 @@ PIN_Config radCtrlCfg[] =
 };
 PIN_Handle radCtrlHandle;
 #endif //CC1350_LAUNCHXL
-
 /*******************************************************************************
  * EXTERNS
  */
@@ -157,45 +142,29 @@ extern Display_Handle dispHandle;
  */
 int main()
 {
-#if defined( USE_FPGA )
-  HWREG(PRCM_BASE + PRCM_O_PDCTL0) &= ~PRCM_PDCTL0_RFC_ON;
-  HWREG(PRCM_BASE + PRCM_O_PDCTL1) &= ~PRCM_PDCTL1_RFC_ON;
-#endif // USE_FPGA
-  
   /* Register Application callback to trap asserts raised in the Stack */
   RegisterAssertCback(AssertHandler);
 
   PIN_init(BoardGpioInitTable);
 
-#ifdef CC1350_LAUNCHXL
-  // Enable 2.4GHz Radio
-  radCtrlHandle = PIN_open(&radCtrlState, radCtrlCfg);
-  
-#ifdef POWER_SAVING
-  Power_registerNotify(&rFSwitchPowerNotifyObj, 
-                       PowerCC26XX_ENTERING_STANDBY | PowerCC26XX_AWAKE_STANDBY,
-                       (Power_NotifyFxn) rFSwitchNotifyCb, NULL);
-#endif //POWER_SAVING
-#endif //CC1350_LAUNCHXL
-
-#if defined( USE_FPGA )
-  // set RFC mode to support BLE
-  // Note: This must be done before the RF Core is released from reset!
-  SET_RFC_BLE_MODE(RFC_MODE_BLE);
-#endif // USE_FPGA
-  
-  // Enable iCache prefetching
-  VIMSConfigure(VIMS_BASE, TRUE, TRUE);
-
-  // Enable cache
-  VIMSModeSet(VIMS_BASE, VIMS_MODE_ENABLED);
-
-#if !defined( POWER_SAVING ) || defined( USE_FPGA )
+#ifndef POWER_SAVING
   /* Set constraints for Standby, powerdown and idle mode */
-  // PowerCC26XX_SB_DISALLOW may be redundant
-  Power_setConstraint(PowerCC26XX_SB_DISALLOW);
-  Power_setConstraint(PowerCC26XX_IDLE_PD_DISALLOW);
-#endif // POWER_SAVING | USE_FPGA
+  Power_setConstraint  (PowerCC26XX_SB_DISALLOW);
+  Power_setConstraint  (PowerCC26XX_IDLE_PD_DISALLOW);
+#endif //POWER_SAVING
+
+  PIN_init(BoardGpioInitTable);
+
+ #ifdef CC1350_LAUNCHXL
+   // Enable 2.4GHz Radio
+   radCtrlHandle = PIN_open(&radCtrlState, radCtrlCfg);
+
+ #ifdef POWER_SAVING
+   Power_registerNotify(&rFSwitchPowerNotifyObj,
+                        PowerCC26XX_ENTERING_STANDBY | PowerCC26XX_AWAKE_STANDBY,
+                        (Power_NotifyFxn) rFSwitchNotifyCb, NULL);
+ #endif //POWER_SAVING
+ #endif //CC1350_LAUNCHXL
 
   /* Initialize ICall module */
   ICall_init();
@@ -206,11 +175,11 @@ int main()
   /* Kick off profile - Priority 3 */
   GAPRole_createTask();
 
-  SimpleBLEPeripheral_createTask();
+  /* Kick off application - Priority 1 */
+   HeartRate_createTask();
+//  RunningSensor_createTask();
 
-  wearableDevice_init();
-  /* enable interrupts and start SYS/BIOS */
-  BIOS_start();
+  BIOS_start();     /* enable interrupts and start SYS/BIOS */
 
   return 0;
 }
@@ -320,6 +289,8 @@ void smallErrorHook(Error_Block *eb)
   for (;;);
 }
 
+
+
 #if defined (CC1350_LAUNCHXL) && defined (POWER_SAVING)
 /*******************************************************************************
  * @fn          rFSwitchNotifyCb
@@ -348,11 +319,12 @@ static uint8_t rFSwitchNotifyCb(uint8_t eventType, uint32_t *eventArg,
     // Power up RF Switch
     PIN_setOutputValue(radCtrlHandle, Board_DIO30_SWPWR, 1);
   }
-  
+
   // Notification handled successfully
   return Power_NOTIFYDONE;
 }
 #endif //CC1350_LAUNCHXL || POWER_SAVING
+
 
 
 /*******************************************************************************

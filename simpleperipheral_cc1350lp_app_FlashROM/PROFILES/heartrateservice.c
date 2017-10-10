@@ -1,47 +1,54 @@
-/**************************************************************************************************
-  Filename:       heartrateservice.c
-  Revised:        $Date: 2013-08-15 15:28:40 -0700 (Thu, 15 Aug 2013) $
-  Revision:       $Revision: 34986 $
+/******************************************************************************
 
-  Description:    This file contains the Heart Rate sample service 
-                  for use with the Heart Rate sample application.
+ @file  heartrateservice.c
 
-  Copyright 2011 - 2013 Texas Instruments Incorporated. All rights reserved.
+ @brief This file contains the Heart Rate sample service for use with the
+        Heart Rate sample application.
 
-  IMPORTANT: Your use of this Software is limited to those specific rights
-  granted under the terms of a software license agreement between the user
-  who downloaded the software, his/her employer (which must be your employer)
-  and Texas Instruments Incorporated (the "License").  You may not use this
-  Software unless you agree to abide by the terms of the License. The License
-  limits your use, and you acknowledge, that the Software may not be modified,
-  copied or distributed unless embedded on a Texas Instruments microcontroller
-  or used solely and exclusively in conjunction with a Texas Instruments radio
-  frequency transceiver, which is integrated into your product.  Other than for
-  the foregoing purpose, you may not use, reproduce, copy, prepare derivative
-  works of, modify, distribute, perform, display or sell this Software and/or
-  its documentation for any purpose.
+ Group: WCS, BTS
+ Target Device: CC2650, CC2640, CC1350
 
-  YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
-  PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
-  INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
-  NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
-  TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,
-  NEGLIGENCE, STRICT LIABILITY, CONTRIBUTION, BREACH OF WARRANTY, OR OTHER
-  LEGAL EQUITABLE THEORY ANY DIRECT OR INDIRECT DAMAGES OR EXPENSES
-  INCLUDING BUT NOT LIMITED TO ANY INCIDENTAL, SPECIAL, INDIRECT, PUNITIVE
-  OR CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF PROCUREMENT
-  OF SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
-  (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
+ ******************************************************************************
+ 
+ Copyright (c) 2011-2016, Texas Instruments Incorporated
+ All rights reserved.
 
-  Should you have any questions regarding your right to use this Software,
-  contact Texas Instruments Incorporated at www.TI.com.
-**************************************************************************************************/
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+
+ *  Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+ *  Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+
+ *  Neither the name of Texas Instruments Incorporated nor the names of
+    its contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+ ******************************************************************************
+ Release Name: ble_sdk_2_02_01_18
+ Release Date: 2016-10-26 15:20:04
+ *****************************************************************************/
 
 /*********************************************************************
  * INCLUDES
  */
 #include "bcomdef.h"
-#include "OSAL.h"
 #include "linkdb.h"
 #include "att.h"
 #include "gatt.h"
@@ -112,13 +119,14 @@ static heartRateServiceCB_t heartRateServiceCB;
  */
 
 // Heart Rate Service attribute
-static CONST gattAttrType_t heartRateService = { ATT_BT_UUID_SIZE, heartRateServUUID };
+static CONST gattAttrType_t heartRateService = {ATT_BT_UUID_SIZE, 
+                                                heartRateServUUID};
 
 // Heart Rate Measurement Characteristic
 // Note characteristic value is not stored here
 static uint8 heartRateMeasProps = GATT_PROP_NOTIFY;
 static uint8 heartRateMeas = 0;
-static gattCharCfg_t heartRateMeasClientCharCfg[GATT_MAX_NUM_CONN];
+static gattCharCfg_t *heartRateMeasClientCharCfg;
 
 // Sensor Location Characteristic
 static uint8 heartRateSensLocProps = GATT_PROP_READ;
@@ -203,15 +211,26 @@ static gattAttribute_t heartRateAttrTbl[] =
 /*********************************************************************
  * LOCAL FUNCTIONS
  */
-static uint8 heartRate_ReadAttrCB( uint16 connHandle, gattAttribute_t *pAttr, 
-                            uint8 *pValue, uint8 *pLen, uint16 offset, uint8 maxLen );
-static bStatus_t heartRate_WriteAttrCB( uint16 connHandle, gattAttribute_t *pAttr,
-                                 uint8 *pValue, uint8 len, uint16 offset );
+static bStatus_t heartRate_ReadAttrCB(uint16_t connHandle,
+                                      gattAttribute_t *pAttr, uint8_t *pValue,
+                                      uint16_t *pLen, uint16_t offset, 
+                                      uint16_t maxLen, uint8_t method);
+static bStatus_t heartRate_WriteAttrCB(uint16_t connHandle,
+                                       gattAttribute_t *pAttr, uint8_t *pValue,
+                                       uint16_t len, uint16_t offset,
+                                       uint8_t method);
 
 /*********************************************************************
  * PROFILE CALLBACKS
  */
 // Heart Rate Service Callbacks
+// Note: When an operation on a characteristic requires authorization and 
+// pfnAuthorizeAttrCB is not defined for that characteristic's service, the 
+// Stack will report a status of ATT_ERR_UNLIKELY to the client.  When an 
+// operation on a characteristic requires authorization the Stack will call 
+// pfnAuthorizeAttrCB to check a client's authorization prior to calling
+// pfnReadAttrCB or pfnWriteAttrCB, so no checks for authorization need to be 
+// made within these functions.
 CONST gattServiceCBs_t heartRateCBs =
 {
   heartRate_ReadAttrCB,  // Read callback function pointer
@@ -234,22 +253,35 @@ CONST gattServiceCBs_t heartRateCBs =
  *
  * @return  Success or Failure
  */
-bStatus_t HeartRate_AddService( uint32 services )
+bStatus_t HeartRate_AddService(uint32 services)
 {
-  uint8 status = SUCCESS;
+  uint8 status;
 
-  // Initialize Client Characteristic Configuration attributes
-  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, heartRateMeasClientCharCfg );
-
-  if ( services & HEARTRATE_SERVICE )
+  // Allocate Client Characteristic Configuration table
+  heartRateMeasClientCharCfg = (gattCharCfg_t *)ICall_malloc( sizeof(gattCharCfg_t) *
+                                                              linkDBNumConns );
+  if ( heartRateMeasClientCharCfg == NULL )
   {
-    // Register GATT attribute list and CBs with GATT Server App
-    status = GATTServApp_RegisterService( heartRateAttrTbl, 
-                                          GATT_NUM_ATTRS( heartRateAttrTbl ),
-                                          &heartRateCBs );
+    return ( bleMemAllocError );
+  }
+  
+  // Initialize Client Characteristic Configuration attributes.
+  GATTServApp_InitCharCfg(INVALID_CONNHANDLE, heartRateMeasClientCharCfg);
+
+  if (services & HEARTRATE_SERVICE)
+  {
+    // Register GATT attribute list and CBs with GATT Server App.
+    status = GATTServApp_RegisterService(heartRateAttrTbl, 
+                                         GATT_NUM_ATTRS(heartRateAttrTbl),
+                                         GATT_MAX_ENCRYPT_KEY_SIZE,
+                                         &heartRateCBs);
+  }
+  else
+  {
+    status = SUCCESS;
   }
 
-  return ( status );
+  return (status);
 }
 
 /*********************************************************************
@@ -261,7 +293,7 @@ bStatus_t HeartRate_AddService( uint32 services )
  *
  * @return  None.
  */
-extern void HeartRate_Register( heartRateServiceCB_t pfnServiceCB )
+extern void HeartRate_Register(heartRateServiceCB_t pfnServiceCB)
 {
   heartRateServiceCB = pfnServiceCB;
 }
@@ -280,10 +312,10 @@ extern void HeartRate_Register( heartRateServiceCB_t pfnServiceCB )
  *
  * @return  bStatus_t
  */
-bStatus_t HeartRate_SetParameter( uint8 param, uint8 len, void *value )
+bStatus_t HeartRate_SetParameter(uint8 param, uint8 len, void *value)
 {
   bStatus_t ret = SUCCESS;
-  switch ( param )
+  switch (param)
   {
      case HEARTRATE_MEAS_CHAR_CFG:
       // Need connection handle
@@ -299,7 +331,7 @@ bStatus_t HeartRate_SetParameter( uint8 param, uint8 len, void *value )
       break;
   }
   
-  return ( ret );
+  return (ret);
 }
 
 /*********************************************************************
@@ -315,10 +347,10 @@ bStatus_t HeartRate_SetParameter( uint8 param, uint8 len, void *value )
  *
  * @return  bStatus_t
  */
-bStatus_t HeartRate_GetParameter( uint8 param, void *value )
+bStatus_t HeartRate_GetParameter(uint8 param, void *value)
 {
   bStatus_t ret = SUCCESS;
-  switch ( param )
+  switch (param)
   {
     case HEARTRATE_MEAS_CHAR_CFG:
       // Need connection handle
@@ -338,7 +370,7 @@ bStatus_t HeartRate_GetParameter( uint8 param, void *value )
       break;
   }
   
-  return ( ret );
+  return (ret);
 }
 
 /*********************************************************************
@@ -352,18 +384,19 @@ bStatus_t HeartRate_GetParameter( uint8 param, void *value )
  *
  * @return      Success or Failure
  */
-bStatus_t HeartRate_MeasNotify( uint16 connHandle, attHandleValueNoti_t *pNoti )
+bStatus_t HeartRate_MeasNotify(uint16 connHandle, attHandleValueNoti_t *pNoti)
 {
-  uint16 value = GATTServApp_ReadCharCfg( connHandle, heartRateMeasClientCharCfg );
+  uint16 value = GATTServApp_ReadCharCfg(connHandle, 
+                                         heartRateMeasClientCharCfg);
 
   // If notifications enabled
-  if ( value & GATT_CLIENT_CFG_NOTIFY )
+  if (value & GATT_CLIENT_CFG_NOTIFY)
   {
-    // Set the handle
+    // Set the handle.
     pNoti->handle = heartRateAttrTbl[HEARTRATE_MEAS_VALUE_POS].handle;
   
-    // Send the notification
-    return GATT_Notification( connHandle, pNoti, FALSE );
+    // Send the notification.
+    return GATT_Notification(connHandle, pNoti, FALSE);
   }
 
   return bleIncorrectMode;
@@ -380,21 +413,24 @@ bStatus_t HeartRate_MeasNotify( uint16 connHandle, attHandleValueNoti_t *pNoti )
  * @param       pLen - length of data to be read
  * @param       offset - offset of the first octet to be read
  * @param       maxLen - maximum length of data to be read
+ * @param       method - type of read message 
  *
- * @return      Success or Failure
+ * @return      SUCCESS, blePending or Failure
  */
-static uint8 heartRate_ReadAttrCB( uint16 connHandle, gattAttribute_t *pAttr, 
-                            uint8 *pValue, uint8 *pLen, uint16 offset, uint8 maxLen )
+static bStatus_t heartRate_ReadAttrCB(uint16_t connHandle,
+                                      gattAttribute_t *pAttr, uint8_t *pValue,
+                                      uint16_t *pLen, uint16_t offset, 
+                                      uint16_t maxLen, uint8_t method)
 {
   bStatus_t status = SUCCESS;
 
   // Make sure it's not a blob operation (no attributes in the profile are long)
-  if ( offset > 0 )
+  if (offset > 0)
   {
-    return ( ATT_ERR_ATTR_NOT_LONG );
+    return (ATT_ERR_ATTR_NOT_LONG);
   }
  
-  uint16 uuid = BUILD_UINT16( pAttr->type.uuid[0], pAttr->type.uuid[1]);
+  uint16 uuid = BUILD_UINT16(pAttr->type.uuid[0], pAttr->type.uuid[1]);
 
   if (uuid == BODY_SENSOR_LOC_UUID)
   {
@@ -406,7 +442,7 @@ static uint8 heartRate_ReadAttrCB( uint16 connHandle, gattAttribute_t *pAttr,
     status = ATT_ERR_ATTR_NOT_FOUND;
   }
 
-  return ( status );
+  return (status);
 }
 
 /*********************************************************************
@@ -419,19 +455,22 @@ static uint8 heartRate_ReadAttrCB( uint16 connHandle, gattAttribute_t *pAttr,
  * @param   pValue - pointer to data to be written
  * @param   len - length of data
  * @param   offset - offset of the first octet to be written
+ * @param   method - type of write message 
  *
- * @return  Success or Failure
+ * @return  SUCCESS, blePending or Failure
  */
-static bStatus_t heartRate_WriteAttrCB( uint16 connHandle, gattAttribute_t *pAttr,
-                                 uint8 *pValue, uint8 len, uint16 offset )
+static bStatus_t heartRate_WriteAttrCB(uint16_t connHandle,
+                                       gattAttribute_t *pAttr, uint8_t *pValue,
+                                       uint16_t len, uint16_t offset,
+                                       uint8_t method)
 {
   bStatus_t status = SUCCESS;
  
-  uint16 uuid = BUILD_UINT16( pAttr->type.uuid[0], pAttr->type.uuid[1]);
-  switch ( uuid )
+  uint16 uuid = BUILD_UINT16(pAttr->type.uuid[0], pAttr->type.uuid[1]);
+  switch (uuid)
   {
     case HEARTRATE_CTRL_PT_UUID:
-      if ( offset > 0 )
+      if (offset > 0)
       {
         status = ATT_ERR_ATTR_NOT_LONG;
       }
@@ -453,15 +492,15 @@ static bStatus_t heartRate_WriteAttrCB( uint16 connHandle, gattAttribute_t *pAtt
       break;
 
     case GATT_CLIENT_CHAR_CFG_UUID:
-      status = GATTServApp_ProcessCCCWriteReq( connHandle, pAttr, pValue, len,
-                                               offset, GATT_CLIENT_CFG_NOTIFY );
-      if ( status == SUCCESS )
+      status = GATTServApp_ProcessCCCWriteReq(connHandle, pAttr, pValue, len,
+                                               offset, GATT_CLIENT_CFG_NOTIFY);
+      if (status == SUCCESS)
       {
-        uint16 charCfg = BUILD_UINT16( pValue[0], pValue[1] );
+        uint16 charCfg = BUILD_UINT16(pValue[0], pValue[1]);
 
-        (*heartRateServiceCB)( (charCfg == GATT_CFG_NO_OPERATION) ?
+        (*heartRateServiceCB)((charCfg == GATT_CFG_NO_OPERATION) ?
                                 HEARTRATE_MEAS_NOTI_DISABLED :
-                                HEARTRATE_MEAS_NOTI_ENABLED );
+                                HEARTRATE_MEAS_NOTI_ENABLED);
       }
       break;       
  
@@ -470,32 +509,7 @@ static bStatus_t heartRate_WriteAttrCB( uint16 connHandle, gattAttribute_t *pAtt
       break;
   }
 
-  return ( status );
-}
-
-/*********************************************************************
- * @fn          HeartRate_HandleConnStatusCB
- *
- * @brief       Heart Rate Service link status change handler function.
- *
- * @param       connHandle - connection handle
- * @param       changeType - type of change
- *
- * @return      none
- */
-void HeartRate_HandleConnStatusCB( uint16 connHandle, uint8 changeType )
-{ 
-  // Make sure this is not loopback connection
-  if ( connHandle != LOOPBACK_CONNHANDLE )
-  {
-    // Reset Client Char Config if connection has dropped
-    if ( ( changeType == LINKDB_STATUS_UPDATE_REMOVED )      ||
-         ( ( changeType == LINKDB_STATUS_UPDATE_STATEFLAGS ) && 
-           ( !linkDB_Up( connHandle ) ) ) )
-    { 
-      GATTServApp_InitCharCfg( connHandle, heartRateMeasClientCharCfg );
-    }
-  }
+  return (status);
 }
 
 

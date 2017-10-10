@@ -41,7 +41,7 @@ else {
 
 var thisObj = {
     cfg:        'C:/ti/simplelink_cc13x0_sdk_1_50_00_08/examples/rtos/CC1350_LAUNCHXL/blestack/simple_peripheral/tirtos/ccs/config/app_ble.cfg',
-    outputPath: 'C:/Users/AppsTI/workspace_blestack/simple_peripheral_cc1350lp_app_FlashROM/.config/xconfig_app_ble',
+    outputPath: 'C:/Users/User/workspace_v7/simple_peripheral_cc1350lp_app_FlashROM/.config/xconfig_app_ble',
     exeName:    'app_ble' + suffix,
     exeIntName: 'app_ble' + suffix.replace('.', '_'),
     targ:       targ,

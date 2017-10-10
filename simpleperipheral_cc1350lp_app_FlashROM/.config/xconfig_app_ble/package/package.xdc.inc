@@ -4,7 +4,7 @@ package/xconfig_app_ble.sch
 package/.vers_g200
 package/.vers_r200
 package/.vers_b200
-package/.xdc-D13
+package/.xdc-D20
 package/xconfig_app_ble.java
 package/xconfig_app_ble.class
 package/package_xconfig_app_ble.c

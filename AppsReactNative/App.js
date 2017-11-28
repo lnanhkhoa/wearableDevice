@@ -2,19 +2,15 @@
 
 import React, { Component } from 'react';
 import { View, AppRegistry } from 'react-native';
-
-import { applyMiddleware, createStore } from 'redux';
+import { Iterable } from 'immutable';
+import { srclyMiddleware, createStore } from 'redux';
 import { Provider } from 'react-redux';
 import { createLogger } from 'redux-logger';
+import configureStore from './src/Redux/store/configureStore'
 
-import ErrorComponent from './app/root/ErrorComponent'
-import BleComponent from './app/ble/BleComponent'
-import MainComponent from './app/root/MainComponent';
-import RootComponent from './app/navigation/RootComponent'
-
-import configureStore from './app/store/configureStore'
-import { Iterable } from 'immutable';
-
+import BleComponent from './src/Ble/BleComponent'
+import ErrorComponent from './src/Views/components/error/ErrorComponent'
+import RootComponent from './src/Views'
 import { checkPermission, requestPermission } from 'react-native-android-permissions';
 
 const stateTransformer = (state) => {
